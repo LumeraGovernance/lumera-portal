@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Home — State of Lumera</title>
+  <title>Registry — State of Lumera</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="Official website of the e-State of Lumera. Constitution, Gazette, Ministries, Citizenship, Archives.">
   <link rel="icon" href="/assets/img/seal.svg">
@@ -29,28 +29,22 @@
 </header>
 <main class="wrap">
 
-<section class="grid">
-  <div class="card">
-    <h3>Read the Constitution</h3>
-    <p>The supreme law of Lumera, adopted Founders’ Day.</p>
-    <p><a class="btn" href="/constitution/">Open Constitution →</a></p>
-  </div>
-  <div class="card">
-    <h3>Latest Gazette</h3>
-    <p>Acts, decrees, rulings, and official notices.</p>
-    <p><a class="btn" href="/gazette/">Browse issues →</a></p>
-  </div>
-  <div class="card">
-    <h3>Become a Citizen</h3>
-    <p>Conscientious consent from age 16. Take the Oath and join.</p>
-    <p><a class="btn" href="/citizenship/">Apply now →</a></p>
-  </div>
-  <div class="card">
-    <h3>Verify a Citizen</h3>
-    <p>Check a citizen ID against the Civil Registry.</p>
-    <p><a class="btn" href="/verify/">Verify →</a></p>
-  </div>
-</section>
+<h2>Civil Registry (Public)</h2>
+<p class="kicker">Public listing shows Lumerian name and Citizen ID only.</p>
+<table id="reg-table">
+  <thead><tr><th>Lumerian Name</th><th>Citizen ID</th><th>Date Admitted</th></tr></thead>
+  <tbody></tbody>
+</table>
+<script>
+fetch('/registry/registry.json').then(r=>r.json()).then(rows=>{
+  const tb=document.querySelector('#reg-table tbody');
+  rows.forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML = `<td>${r.name}</td><td>${r.id}</td><td>${r.date}</td>`;
+    tb.appendChild(tr);
+  });
+});
+</script>
 
 </main>
 <footer class="footer">© Lumera 2025 • Official State Portal</footer>
