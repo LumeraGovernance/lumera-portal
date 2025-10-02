@@ -7,6 +7,10 @@
   <meta name="description" content="Official website of the e-State of Lumera. Constitution, Gazette, Ministries, Citizenship, Archives.">
   <link rel="icon" href="/assets/img/seal.svg">
   <link rel="stylesheet" href="/assets/css/style.css">
+  <style>
+    .pill{display:inline-block;padding:2px 8px;border-radius:999px;background:#eef2ff}
+    .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+  </style>
 </head>
 <body>
 <header class="hero">
@@ -27,26 +31,53 @@
     </nav>
   </div>
 </header>
-<main class="wrap">
 
-<h2>Civil Registry (Public)</h2>
-<p class="kicker">Public listing shows Lumerian name and Citizen ID only.</p>
-<table id="reg-table">
-  <thead><tr><th>Lumerian Name</th><th>Citizen ID</th><th>Date Admitted</th></tr></thead>
-  <tbody></tbody>
-</table>
+<main class="wrap">
+  <h2>Civil Registry (Public)</h2>
+  <p class="kicker">Public listing shows Lumerian name, Citizen ID, and Tribe membership.</p>
+  <table id="reg-table">
+    <thead>
+      <tr>
+        <th>Lumerian Name</th>
+        <th>Citizen ID</th>
+        <th>Tribes</th>
+        <th>Date Admitted</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</main>
+
+<footer class="footer">© Lumera 2025 • Official State Portal</footer>
+
 <script>
-fetch('/registry/registry.json').then(r=>r.json()).then(rows=>{
-  const tb=document.querySelector('#reg-table tbody');
-  rows.forEach(r=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML = `<td>${r.name}</td><td>${r.id}</td><td>${r.date}</td>`;
-    tb.appendChild(tr);
-  });
+async function j(url){ const r=await fetch(url); return r.json(); }
+
+Promise.all([
+  j('/registry/registry.json'), // citizens list
+  j('/registry/tribes.json')    // tribes membership
+]).then(([citizensArr, tribesDoc])=>{
+  // Build map CitizenID -> array of tribe codes
+  const belongs = {};
+  for(const code of Object.keys(tribesDoc.tribes)){
+    for(const id of (tribesDoc.tribes[code].members||[])){
+      (belongs[id] ||= []).push(code);
+    }
+  }
+
+  const tb = document.querySelector('#reg-table tbody');
+  tb.innerHTML = citizensArr.sort((a,b)=>a.id.localeCompare(b.id)).map(r=>`
+    <tr>
+      <td>${r.name}</td>
+      <td class="mono">${r.id}</td>
+      <td>${(belongs[r.id]||[]).map(t=>`<span class="pill mono">${t}</span>`).join(' ')}</td>
+      <td>${r.date||''}</td>
+    </tr>
+  `).join('');
+}).catch(err=>{
+  document.querySelector('#reg-table tbody').innerHTML =
+    `<tr><td colspan="4">Error loading registry: ${err.message}</td></tr>`;
 });
 </script>
-
-</main>
-<footer class="footer">© Lumera 2025 • Official State Portal</footer>
 </body>
 </html>

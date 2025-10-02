@@ -1,0 +1,29 @@
+{
+  "updated": "2025-10-02",
+  "tribes": {
+    "TUR": {
+      "code": "TUR",
+      "name": "Tûřanke Tribe",
+      "desc": "Culture, language, festivals.",
+      "members": ["LUM0001"]
+    },
+    "GOV": {
+      "code": "GOV",
+      "name": "Governance Circle",
+      "desc": "Council procedures, Gazette, archives.",
+      "members": ["LUM0001"]
+    },
+    "KIO": {
+      "code": "KIO",
+      "name": "Kiongozi Tribe",
+      "desc": "Leadership & Sports.",
+      "members": ["LUM0002"]
+    },
+    "INF": {
+      "code": "INF",
+      "name": "Infrastructure Circle",
+      "desc": "Operate digital infrastructure and plan Anolle projects.",
+      "members": ["LUM0002"]
+    }
+  }
+}
