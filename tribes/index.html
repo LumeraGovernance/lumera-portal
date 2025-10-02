@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Tribal Registry — State of Lumera</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Public listing of Lumera tribes and members." />
+  <link rel="icon" href="/assets/img/seal.svg" />
+  <link rel="stylesheet" href="/assets/css/style.css" />
+  <style>
+    .pill{display:inline-block;padding:2px 8px;border-radius:999px;background:#eef2ff}
+    .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+    .muted{color:#6b7280}
+    .right{text-align:right}
+    .tbl{width:100%;border-collapse:collapse}
+    .tbl th,.tbl td{padding:8px 10px;border-bottom:1px solid #e5e7eb}
+  </style>
+</head>
+<body>
+<header class="hero">
+  <div class="hero-inner">
+    <img class="seal" src="/assets/img/seal.svg" alt="Seal of Lumera">
+    <h1>Tribal Registry</h1>
+    <p class="motto">Truth • Virtue • Liberty • Prosperity</p>
+    <nav class="nav">
+      <a href="/">Home</a>
+      <a href="/constitution/">Constitution</a>
+      <a href="/gazette/">Gazette</a>
+      <a href="/ministries/">Ministries</a>
+      <a href="/citizenship/">Citizenship</a>
+      <a href="/registry/">Registry</a>
+      <a href="/projects/">Projects</a>
+      <a href="/archives/">Archives</a>
+      <a aria-current="page" href="/tribes/">Tribes</a>
+      <a href="/contact/">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="stamp" class="small muted"></div>
+  <div id="tribe-list"></div>
+</main>
+
+<footer class="footer">© Lumera 2025 • Official State Portal</footer>
+
+<script>
+async function getJSON(url){ const r = await fetch(url); if(!r.ok) throw new Error(url+" "+r.status); return r.json(); }
+
+Promise.all([
+  // citizens: array like [{ "name":"Amazaátan tûřanke","id":"LUM0123","date":"2025-09-29" }, ...]
+  getJSON('/registry/registry.json'),
+  // tribes: object like { "updated":"YYYY-MM-DD","tribes": { "KEIR": { code,name,desc,members:[ "LUM0123", ... ] } } }
+  getJSON('/registry/tribes.json')
+]).then(([citizensArr, tribesDoc])=>{
+  // Map citizen ID -> {name,date}
+  const citizens = {};
+  citizensArr.forEach(c => { citizens[c.id] = { name:c.name, date:c.date }; });
+
+  const { tribes, updated } = tribesDoc;
+  document.getElementById('stamp').textContent = `Last updated: ${updated || '—'}`;
+
+  const codes = Object.keys(tribes).sort();
+  const html = codes.map(code => {
+    const t = tribes[code];
+    const rows = (t.members || []).map(id => {
+      const c = citizens[id] || {};
+      return `<tr>
+        <td>${c.name || '—'}</td>
+        <td class="mono">${id}</td>
+        <td class="right">${c.date || ''}</td>
+      </tr>`;
+    }).join('') || `<tr><td colspan="3" class="muted">No members listed.</td></tr>`;
+
+    return `
+      <section class="card">
+        <h2>${t.name} <span class="pill mono">${t.code}</span></h2>
+        <p class="muted">${t.desc || ''}</p>
+        <table class="tbl">
+          <thead>
+            <tr><th>Lumerian Name</th><th class="mono">Citizen ID</th><th class="right">Admitted</th></tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </section>
+    `;
+  }).join('');
+
+  document.getElementById('tribe-list').innerHTML = html || '<p class="muted">No tribes yet.</p>';
+}).catch(err=>{
+  document.getElementById('tribe-list').innerHTML = `<p class="muted">Error loading tribal registry: ${err.message}</p>`;
+});
+</script>
+</body>
+</html>
