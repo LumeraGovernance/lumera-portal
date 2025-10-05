@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Lumera Education Portal — Catalog</title>
+
   <style>
     *{box-sizing:border-box}html,body{margin:0;padding:0;font-family:system-ui,Segoe UI,Roboto,Inter,Arial,sans-serif;background:#f6f7f8;color:#111}
     a{color:inherit} .container{max-width:1100px;margin:0 auto;padding:24px}
@@ -22,17 +23,21 @@
     .progress > div{height:100%;background:#10b981}
     .small{font-size:12px;color:#555}
     footer{border-top:1px solid #e6e7e8;padding:32px;margin-top:48px;color:#555}
+    .access{max-width:560px;border:1px solid #e6e7e8;border-radius:16px;padding:16px;background:#fff}
+    .mono{font-family:ui-monospace,Consolas,Menlo,monospace}
   </style>
+
 </head>
 <body>
   <div id="app"></div>
   <script>
-    // -------- Auth (front-end demo only) --------
+
+    // --- auth helpers (front-end only) ---
     const ACCESS_KEYS = [
-      { id: "admin-demo",  role: "admin",  key: "LUMERA-ADMIN-KEY-EXAMPLE" },
+      { id: "admin-demo", role: "admin",  key: "LUMERA-ADMIN-KEY-EXAMPLE" },
       { id: "author-demo", role: "author", key: "LUMERA-AUTHOR-KEY-EXAMPLE" }
     ];
-    function getAuth(){ try{ return JSON.parse(localStorage.getItem("lumera.auth"))||{role:"viewer"} }catch{ return {role:"viewer"} } }
+    function getAuth(){ try{ return JSON.parse(localStorage.getItem("lumera.auth")) || {role:"viewer"} }catch{ return {role:"viewer"} } }
     function setAuth(a){ localStorage.setItem("lumera.auth", JSON.stringify(a)); }
     function promptLogin(){
       const k = prompt("Enter your Lumera user key:"); if(!k) return getAuth();
@@ -48,24 +53,7 @@
       }
     }catch{} })();
 
-    // -------- Data --------
-    function getCourses(){
-      try{ const v=localStorage.getItem("lumera.courses"); if(v) return JSON.parse(v); }catch{}
-      return [{
-        id:"getting-started",
-        title:"Getting Started (Template)",
-        category:"Onboarding",
-        level:"Beginner",
-        durationMinutes:15,
-        summary:"A blank template to demonstrate how to structure a course. Replace with your own content.",
-        hero:"https://images.unsplash.com/photo-1523246191544-74961f7f9ab9?q=80&w=1600&auto=format&fit=crop",
-        modules:[{ id:"module-1", title:"Module 1 (Rename Me)", lessons:[{ id:"lesson-1", title:"Lesson 1 (Write your content)", contentHTML:"<p>This is a placeholder lesson. Open Studio to edit.</p>"}]}]
-      }];
-    }
-    function getProgress(cid){ try{ const v=localStorage.getItem("lumera.progress."+cid); if(v) return JSON.parse(v);}catch{} return {completed:{},quiz:null}; }
-    function progressPercent(progress, course){ const total=course.modules.reduce((a,m)=>a+m.lessons.length,0); const done=Object.values(progress.completed||{}).filter(Boolean).length; return total?Math.round((done/total)*100):0; }
-
-    // -------- DOM helpers --------
+    // --- tiny DOM helper ---
     function h(tag, attrs={}, ...children){
       const el=document.createElement(tag);
       for(const k in attrs){ const v=attrs[k];
@@ -78,69 +66,51 @@
       return el;
     }
 
-    // -------- UI --------
-    function topbar() {
-  const auth = getAuth();
-  const roleLabel = auth && auth.role ? auth.role : "viewer";
+    // --- fixed topbar (prevents 'nullnull') ---
+    function topbar(titleText, showStudio, showAdmin){
+      const auth = getAuth();
+      const roleLabel = auth && auth.role ? auth.role : "viewer";
 
-  const navButtons = [
-    h("span", { class: "small" }, "Role: " + roleLabel),
-    roleLabel === "viewer"
-      ? h(
-          "button",
-          {
-            class: "btn",
-            onClick: () => {
-              promptLogin();
-              location.reload();
-            },
-          },
-          "Sign in"
+      const navButtons = [
+        h("span", { class: "small" }, "Role: " + roleLabel),
+        roleLabel === "viewer"
+          ? h("button", { class:"btn", onClick:()=>{ promptLogin(); location.reload(); } }, "Sign in")
+          : h("button", { class:"btn", onClick:()=>{ if(confirm("Sign out?")){ setAuth({role:"viewer"}); location.reload(); } } }, "Sign out")
+      ];
+
+      return h("div",{class:"topbar"},
+        h("div",{class:"inner"},
+          h("div",{class:"logo"},"L"),
+          h("strong",{}, titleText || "Lumera Education Portal"),
+          h("div",{style:{flex:1}}),
+          h("a",{class:"btn",href:"index.html"},"Catalog"),
+          ((roleLabel==="author"||roleLabel==="admin") && showStudio) ? h("a",{class:"btn",href:"studio.html"},"Studio") : null,
+          (roleLabel==="admin" && showAdmin) ? h("a",{class:"btn",href:"admin.html"},"Admin") : null,
+          h("div",{class:"nav"}, ...navButtons)
         )
-      : h(
-          "button",
-          {
-            class: "btn",
-            onClick: () => {
-              if (confirm("Sign out?")) {
-                setAuth({ role: "viewer" });
-                location.reload();
-              }
-            },
-          },
-          "Sign out"
-        ),
-  ];
+      );
+    }
 
-  return h(
-    "div",
-    { class: "topbar" },
-    h(
-      "div",
-      { class: "inner" },
-      h("div", { class: "logo" }, "L"),
-      h("strong", {}, "Lumera Education Portal"),
-      h("div", { style: { flex: 1 } }),
-      h("a", { class: "btn", href: "index.html" }, "Catalog"),
-      (roleLabel === "author" || roleLabel === "admin") &&
-        h("a", { class: "btn", href: "studio.html" }, "Studio"),
-      roleLabel === "admin" &&
-        h("a", { class: "btn", href: "admin.html" }, "Admin"),
-      h("div", { class: "nav" }, navButtons)
-    )
-  );
-}
+    function getCourses(){ try{const v=localStorage.getItem("lumera.courses"); if(v) return JSON.parse(v);}catch{} return [{
+      id:"getting-started",
+      title:"Getting Started (Template)",
+      category:"Onboarding",
+      level:"Beginner",
+      durationMinutes:15,
+      summary:"A blank template to demonstrate how to structure a course. Replace with your own content.",
+      hero:"https://images.unsplash.com/photo-1523246191544-74961f7f9ab9?q=80&w=1600&auto=format&fit=crop",
+      modules:[{ id:"module-1", title:"Module 1 (Rename Me)", lessons:[{ id:"lesson-1", title:"Lesson 1 (Write your content)", contentHTML:"<p>This is a placeholder lesson. Open Studio to edit.</p>"}]}]
+    }]; }
+    function getProgress(cid){ try{const v=localStorage.getItem("lumera.progress."+cid); if(v) return JSON.parse(v);}catch{} return {completed:{},quiz:null}; }
+    function progressPercent(p, course){ const total=course.modules.reduce((a,m)=>a+m.lessons.length,0); const done=Object.values(p.completed||{}).filter(Boolean).length; return total?Math.round((done/total)*100):0; }
 
-
-    function catalog(){
-      const grid = h("div",{class:"grid"});
-      getCourses().forEach(c=>{
-        const pct = progressPercent(getProgress(c.id), c);
+    function catalog(){ const grid=h("div",{class:"grid"}); const courses=getCourses();
+      courses.forEach(c=>{ const pct=progressPercent(getProgress(c.id), c);
         grid.append(
           h("div",{class:"card"},
-            c.hero ? h("div",{class:"media",style:{backgroundImage:`url(${c.hero})`}}) : null,
+            c.hero?h("div",{class:"media",style:{backgroundImage:`url(${c.hero})`}}):null,
             h("div",{class:"body"},
-              h("div",{}, h("span",{class:"badge"},c.category)," ", c.level ? h("span",{class:"badge"},c.level) : null),
+              h("div",{}, h("span",{class:"badge"},c.category)," ", c.level?h("span",{class:"badge"},c.level):null),
               h("h3",{style:{marginTop:'6px',fontSize:'18px'}},c.title),
               h("p",{class:"small",style:{marginTop:'4px'}},c.summary),
               h("div",{class:"progress",style:{marginTop:'8px'}}, h("div",{style:{width:pct+'%'}}))
@@ -151,10 +121,8 @@
       return grid;
     }
 
-    function boot(){
-      const app=document.getElementById("app");
-      app.innerHTML="";
-      app.append(topbar());
+    function boot(){ const app=document.getElementById("app"); app.innerHTML="";
+      app.append(topbar("Lumera Education Portal", true, true));
       app.append(
         h("div",{class:"container"},
           h("h2",{},"Course Catalog"),
