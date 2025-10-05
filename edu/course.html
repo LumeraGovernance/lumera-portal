@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Lumera Course</title>
+
   <style>
     *{box-sizing:border-box}html,body{margin:0;padding:0;font-family:system-ui,Segoe UI,Roboto,Inter,Arial,sans-serif;background:#f6f7f8;color:#111}
     a{color:inherit;text-decoration:none}
@@ -14,8 +15,17 @@
     .nav{margin-left:auto;display:flex;gap:8px;align-items:center}
     .btn{padding:8px 12px;border:1px solid #d0d2d4;border-radius:10px;background:#fff;cursor:pointer}
     .badge{font-size:12px;padding:2px 8px;border-radius:999px;background:#f1f3f5;color:#222;border:1px solid #e6e7e8}
-    .grid-course{display:grid;grid-template-columns:320px 1fr;gap:18px}
+    .grid-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
     .card{background:#fff;border:1px solid #e6e7e8;border-radius:16px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+    .card .media{height:140px;background:#eee;background-size:cover;background-position:center}
+    .card .body{padding:12px 14px}
+    .progress{height:8px;background:#eceff1;border-radius:999px;overflow:hidden}
+    .progress > div{height:100%;background:#10b981}
+    .small{font-size:12px;color:#555}
+    .mono{font-family:ui-monospace,Consolas,Menlo,monospace}
+    footer{border-top:1px solid #e6e7e8;padding:32px;margin-top:48px;color:#555}
+    /* Course page */
+    .grid-course{display:grid;grid-template-columns:320px 1fr;gap:18px}
     .section{background:#fff;border:1px solid #e6e7e8;border-radius:16px}
     .section .hd{padding:12px 16px;border-bottom:1px solid #e6e7e8;display:flex;align-items:center;gap:8px}
     .section .bd{padding:16px}
@@ -23,175 +33,74 @@
     .syllabus li{margin:0;padding:4px 0}
     .lesson-btn{width:100%;text-align:left;padding:8px 10px;border:1px solid #e6e7e8;border-radius:10px;background:#fff;cursor:pointer}
     .lesson-btn.active{border-color:#10b981;background:#ecfdf5}
-    .progress{height:8px;background:#eceff1;border-radius:999px;overflow:hidden}
-    .progress > div{height:100%;background:#10b981}
-    .small{font-size:12px;color:#555}
     .prose p, .prose ul, .prose ol, .prose pre, .prose h3, .prose h4 { margin: 0 0 10px 0; }
     .prose ul { padding-left: 18px; }
     .toolbar{display:flex;gap:8px;align-items:center}
-    footer{border-top:1px solid #e6e7e8;padding:32px;margin-top:48px;color:#555}
   </style>
+
 </head>
 <body>
   <div id="app"></div>
   <script>
-    const ACCESS_KEYS=[{id:"admin-demo",role:"admin",key:"LUMERA-ADMIN-KEY-EXAMPLE"},{id:"author-demo",role:"author",key:"LUMERA-AUTHOR-KEY-EXAMPLE"}];
-    function getAuth(){ try{ return JSON.parse(localStorage.getItem("lumera.auth")) || {role:"viewer"} }catch{ return {role:"viewer"} } }
-    function setAuth(a){ localStorage.setItem("lumera.auth", JSON.stringify(a)); }
-    function promptLogin(){ const k=prompt("Enter your Lumera user key:"); if(!k) return getAuth(); const f=ACCESS_KEYS.find(x=>x.key===k.trim()); if(f){ const next={role:f.role,keyId:f.id}; setAuth(next); alert("Signed in as "+f.role); return next;} alert("Invalid key"); return getAuth(); }
-    (function(){ try{ const p=new URLSearchParams(location.search); const k=p.get("key"); if(k){ const f=ACCESS_KEYS.find(x=>x.key===k.trim()); if(f){ setAuth({role:f.role,keyId:f.id}); } history.replaceState({}, document.title, location.pathname + location.hash);} }catch{} })();
+
+    const ACCESS_KEYS=[{id:'admin-demo',role:'admin',key:'LUMERA-ADMIN-KEY-EXAMPLE'}];
+    function getAuth(){ try{ return JSON.parse(localStorage.getItem('lumera.auth')) || {role:'viewer'} }catch{ return {role:'viewer'} } }
+    function setAuth(a){ localStorage.setItem('lumera.auth', JSON.stringify(a)); }
+    function promptLogin(){ const k=prompt('Enter your Lumera user key:'); if(!k) return getAuth(); const f=ACCESS_KEYS.find(x=>x.key===k.trim()); if(f){ const next={role:f.role,keyId:f.id}; setAuth(next); alert('Signed in as '+f.role); return next;} alert('Invalid key'); return getAuth(); }
+    (function(){ try{ const p=new URLSearchParams(location.search); const k=p.get('key'); if(k){ const f=ACCESS_KEYS.find(x=>x.key===k.trim()); if(f){ setAuth({role:f.role,keyId:f.id}); } history.replaceState({}, document.title, location.pathname + location.hash);} }catch{} })();
 
     function h(tag, attrs={}, ...children){
       const el=document.createElement(tag);
       for(const k in attrs){ const v=attrs[k];
-        if(k==="class") el.className=v;
-        else if(k==="style"&&typeof v==="object") Object.assign(el.style,v);
-        else if(k.startsWith("on")&&typeof v==="function") el.addEventListener(k.slice(2).toLowerCase(), v);
+        if(k==='class') el.className=v;
+        else if(k==='style'&&typeof v==='object') Object.assign(el.style,v);
+        else if(k.startsWith('on')&&typeof v==='function') el.addEventListener(k.slice(2).toLowerCase(), v);
         else el.setAttribute(k,v);
       }
       children.flat().forEach(c=>el.append(c instanceof Node?c:document.createTextNode(c)));
       return el;
     }
-    function topbar(){
-      const auth=getAuth(); const role=auth&&auth.role?auth.role:"viewer";
-      return h("div",{class:"topbar"},
-        h("div",{class:"inner"},
-          h("div",{class:"logo"},"L"),
-          h("a",{href:"index.html"}, h("strong",{},"Lumera Education Portal")),
-          h("div",{style:{flex:1}}),
-          h("a",{class:"btn",href:"index.html"},"Catalog"),
-          ((role==="author"||role==="admin")) ? h("a",{class:"btn",href:"studio.html"},"Studio") : null,
-          (role==="admin") ? h("a",{class:"btn",href:"admin.html"},"Admin") : null,
-          h("div",{class:"nav"},
-            h("span",{class:"small"},"Role: "+role),
-            role==="viewer"
-              ? h("button",{class:"btn",onClick:()=>{promptLogin(); location.reload();}},"Sign in")
-              : h("button",{class:"btn",onClick:()=>{ if(confirm('Sign out?')){ setAuth({role:'viewer'}); location.reload(); } }},"Sign out")
+    function topbar(title){
+      const role=(getAuth().role)||'viewer';
+      return h('div',{class:'topbar'},
+        h('div',{class:'inner'},
+          h('div',{class:'logo'},'L'),
+          h('a',{href:'index.html'}, h('strong',{}, title||'Lumera Education Portal')),
+          h('div',{style:{flex:1}}),
+          h('a',{class:'btn',href:'index.html'},'Catalog'),
+          role==='admin' ? h('a',{class:'btn',href:'admin.html'},'Admin') : h('a',{class:'btn',href:'author-guide.html'},'Authors'),
+          h('div',{class:'nav'},
+            h('span',{class:'small'},'Role: '+role),
+            role==='viewer'
+              ? h('button',{class:'btn',onClick:()=>{promptLogin(); location.reload();}},'Sign in')
+              : h('button',{class:'btn',onClick:()=>{ if(confirm('Sign out?')){ setAuth({role:'viewer'}); location.reload(); } }},'Sign out')
           )
         )
       );
     }
 
-    function getCourses(){ try{ const v=localStorage.getItem("lumera.courses"); if(v) return JSON.parse(v); }catch{} return []; }
-    function getProgress(courseId){ try{ const v=localStorage.getItem("lumera.progress."+courseId); if(v) return JSON.parse(v); }catch{} return {completed:{},quiz:null}; }
-    function setProgress(courseId, val){ localStorage.setItem("lumera.progress."+courseId, JSON.stringify(val)); }
-    function lessonKey(cId, mId, lId){ return cId+"|"+mId+"|"+lId; }
-    function markLessonComplete(courseId, moduleId, lessonId, value){
-      const cur = getProgress(courseId);
-      cur.completed[lessonKey(courseId, moduleId, lessonId)] = !!value;
-      setProgress(courseId, cur);
-    }
-    function progressPercent(progress, course){
-      const total = (course.modules||[]).reduce((a,m)=>a+(m.lessons||[]).length, 0);
-      const done = Object.values(progress.completed||{}).filter(Boolean).length;
-      return total ? Math.round((done/total)*100) : 0;
-    }
-    function getParam(name){ return new URLSearchParams(location.search).get(name); }
+    function getCourses(){ try{ const v=localStorage.getItem('lumera.courses'); if(v) return JSON.parse(v); }catch{} return []; }
+    function getProgress(id){ try{ const v=localStorage.getItem('lumera.progress.'+id); if(v) return JSON.parse(v); }catch{} return {completed:{},quiz:null}; }
+    function setProgress(id, val){ localStorage.setItem('lumera.progress.'+id, JSON.stringify(val)); }
+    function lessonKey(c,m,l){ return c+'|'+m+'|'+l; }
+    function markLessonComplete(cid, mid, lid, val){ const cur=getProgress(cid); cur.completed[lessonKey(cid,mid,lid)]=!!val; setProgress(cid,cur); }
+    function progressPercent(p,c){ const t=(c.modules||[]).reduce((a,m)=>a+(m.lessons||[]).length,0); const d=Object.values(p.completed||{}).filter(Boolean).length; return t?Math.round((d/t)*100):0; }
+    function getParam(n){ return new URLSearchParams(location.search).get(n); }
 
-    function renderCourse(){
-      const courseId = getParam("course");
-      const all = getCourses();
-      const course = all.find(c => c.id === courseId);
-      const wrap = h("div",{class:"container"});
-
-      if(!course){
-        wrap.append(
-          h("div",{class:"section"},
-            h("div",{class:"hd"}, h("strong",{},"Course not found")),
-            h("div",{class:"bd"},
-              h("p",{},"We couldn’t find a course with id: ", h("code",{}, String(courseId||""))),
-              h("p",{}, "Go back to ", h("a",{href:"index.html"}, "Catalog"), " or open ", h("a",{href:"studio.html"}, "Studio"), " to add courses.")
-            )
-          )
-        );
-        return wrap;
-      }
-
-      const progress = getProgress(course.id);
-      const pct = progressPercent(progress, course);
-
-      wrap.append(
-        h("div",{class:"card"},
-          course.hero ? h("div",{style:{height:"180px",background:`url(${course.hero}) center/cover no-repeat`}}) : null,
-          h("div",{style:{padding:"14px 16px"}},
-            h("div",{}, h("span",{class:"badge"}, course.category || "General"), course.level ? " " + (h("span",{class:"badge"}, course.level).outerHTML) : "" ),
-            h("h2",{style:{margin:"8px 0 4px 0"}}, course.title),
-            h("p",{class:"small"}, course.summary || ""),
-            h("div",{class:"progress",style:{marginTop:"8px"}}, h("div",{style:{width:pct+'%'}}))
-          )
-        )
-      );
-
-      const grid = h("div",{class:"grid-course", style:{marginTop:"16px"}});
-      const left = h("div",{});
-      const right = h("div",{});
-
-      const syllabus = h("div",{class:"section syllabus"},
-        h("div",{class:"hd"}, h("strong",{},"Syllabus")),
-        h("div",{class:"bd"})
-      );
-      const sylBody = syllabus.querySelector(".bd");
-
-      const content = h("div",{class:"section"},
-        h("div",{class:"hd"},
-          h("div",{class:"toolbar"},
-            h("a",{class:"btn",href:"index.html"},"← Back"),
-            h("span",{class:"small"},"Lesson content")
-          )
-        ),
-        h("div",{class:"bd prose", id:"lesson-content"},
-          h("p",{},"Select a lesson on the left to view its content.")
-        )
-      );
-
-      function openLesson(moduleId, l){
-        const pane = document.getElementById("lesson-content");
-        pane.innerHTML = "";
-        pane.append(
-          h("h3",{}, l.title),
-          h("div",{class:"small",style:{margin:"6px 0 8px 0"}}, "Module: ", moduleId),
-          (()=>{ const d=document.createElement("div"); d.innerHTML = l.contentHTML || "<p>No content.</p>"; return d; })(),
-          h("div",{style:{marginTop:"12px", display:"flex", gap:"8px"}},
-            h("button",{class:"btn", onClick:()=>{ markLessonComplete(course.id, moduleId, l.id, true); location.reload(); }}, "Mark Complete"),
-            h("button",{class:"btn", onClick:()=>{ markLessonComplete(course.id, moduleId, l.id, false); location.reload(); }}, "Unmark")
-          )
-        );
-        sylBody.querySelectorAll(".lesson-btn").forEach(b => b.classList.remove("active"));
-        const activeBtn = sylBody.querySelector(`[data-lesson-id="${l.id}"][data-module-id="${moduleId}"]`);
-        if(activeBtn) activeBtn.classList.add("active");
-      }
-
-      (course.modules || []).forEach(m=>{
-        sylBody.append( h("div",{style:{fontWeight:"600", margin:"4px 0 6px 0"}}, m.title) );
-        (m.lessons || []).forEach(l=>{
-          const completed = !!progress.completed[lessonKey(course.id, m.id, l.id)];
-          sylBody.append(
-            h("div",{style:{margin:"4px 0 8px 0"}},
-              h("button",{
-                class:"lesson-btn" + (completed ? " active" : ""),
-                "data-lesson-id": l.id,
-                "data-module-id": m.id,
-                onClick:()=>openLesson(m.id, l)
-              }, (completed ? "✅ " : "📘 "), l.title)
-            )
-          );
-        });
-      });
-
-      left.append(syllabus);
-      right.append(content);
-      grid.append(left, right);
-      wrap.append(grid);
-      return wrap;
+    function renderCourse(){ const id=getParam('course'); const all=getCourses(); const course=all.find(c=>c.id===id); const wrap=h('div',{class:'container'});
+      if(!course){ wrap.append(h('div',{class:'section'}, h('div',{class:'hd'}, h('strong',{},'Course not found')), h('div',{class:'bd'}, h('p',{},'We couldn\u2019t find a course with id: ', h('code',{}, String(id||''))), h('p',{}, 'Go back to ', h('a',{href:'index.html'}, 'Catalog'), ' or contact the site admin.')))); return wrap; }
+      const p=getProgress(course.id); const pct=progressPercent(p,course);
+      wrap.append(h('div',{class:'card'}, course.hero?h('div',{style:{height:'180px',background:`url(${course.hero}) center/cover no-repeat`}}):null, h('div',{style:{padding:'14px 16px'}}, h('div',{}, h('span',{class:'badge'}, course.category||'General'), course.level ? ' '+(h('span',{class:'badge'}, course.level).outerHTML) : ''), h('h2',{style:{margin:'8px 0 4px 0'}}, course.title), h('p',{class:'small'}, course.summary||''), h('div',{class:'progress',style:{marginTop:'8px'}}, h('div',{style:{width:pct+'%'}})) )));
+      const grid=h('div',{class:'grid-course', style:{marginTop:'16px'}}); const left=h('div',{}); const right=h('div',{});
+      const syllabus=h('div',{class:'section syllabus'}, h('div',{class:'hd'}, h('strong',{},'Syllabus')), h('div',{class:'bd'})); const sylBody=syllabus.querySelector('.bd');
+      const content=h('div',{class:'section'}, h('div',{class:'hd'}, h('div',{class:'toolbar'}, h('a',{class:'btn',href:'index.html'},'\u2190 Back'), h('span',{class:'small'},'Lesson content'))), h('div',{class:'bd prose',id:'lesson-content'}, h('p',{},'Select a lesson on the left to view its content.')));
+      function openLesson(mid,l){ const pane=document.getElementById('lesson-content'); pane.innerHTML=''; pane.append(h('h3',{}, l.title), h('div',{class:'small',style:{margin:'6px 0 8px 0'}}, 'Module: ', mid), (function(){ const d=document.createElement('div'); d.innerHTML=l.contentHTML||'<p>No content.</p>'; return d; })(), h('div',{style:{marginTop:'12px',display:'flex',gap:'8px'}}, h('button',{class:'btn',onClick:()=>{ markLessonComplete(course.id, mid, l.id, true); location.reload(); }},'Mark Complete'), h('button',{class:'btn',onClick:()=>{ markLessonComplete(course.id, mid, l.id, false); location.reload(); }},'Unmark') )); sylBody.querySelectorAll('.lesson-btn').forEach(b=>b.classList.remove('active')); const active=sylBody.querySelector(`[data-lesson-id="${l.id}"][data-module-id="${mid}"]`); if(active) active.classList.add('active'); }
+      (course.modules||[]).forEach(m=>{ sylBody.append(h('div',{style:{fontWeight:'600', margin:'4px 0 6px 0'}}, m.title)); (m.lessons||[]).forEach(l=>{ const done=!!p.completed[lessonKey(course.id,m.id,l.id)]; sylBody.append(h('div',{style:{margin:'4px 0 8px 0'}}, h('button',{ class:'lesson-btn'+(done?' active':''), 'data-lesson-id': l.id, 'data-module-id': m.id, onClick:()=>openLesson(m.id, l) }, (done?'\u2705 ':'\ud83d\udcd8 '), l.title))); }); });
+      left.append(syllabus); right.append(content); grid.append(left,right); wrap.append(grid); return wrap;
     }
 
-    function boot(){
-      const app=document.getElementById("app"); app.innerHTML="";
-      app.append(topbar());
-      app.append(renderCourse());
-      document.body.append(h("footer",{}, h("div",{class:"container"},"© ", new Date().getFullYear(), " Lumera")));
-    }
-    document.addEventListener("DOMContentLoaded", boot);
+    function boot(){ const app=document.getElementById('app'); app.innerHTML=''; app.append(topbar('Lumera Course')); app.append(renderCourse()); document.body.append(h('footer',{}, h('div',{class:'container'}, '© ', new Date().getFullYear(), ' Lumera'))); }
+    document.addEventListener('DOMContentLoaded', boot);
   </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Lumera Admin</title>
+  <title>Author Guide</title>
 
   <style>
     *{box-sizing:border-box}html,body{margin:0;padding:0;font-family:system-ui,Segoe UI,Roboto,Inter,Arial,sans-serif;background:#f6f7f8;color:#111}
@@ -80,22 +80,11 @@
       );
     }
 
-    function getAuth(){ try{ return JSON.parse(localStorage.getItem('lumera.auth')) || {role:'viewer'} }catch{ return {role:'viewer'} } }
-    function getCourses(){ try{const v=localStorage.getItem('lumera.courses'); if(v) return JSON.parse(v);}catch{} return []; }
-    function setCourses(list){ localStorage.setItem('lumera.courses', JSON.stringify(list)); }
-
-    function guardAdmin(){ const role=getAuth().role; if(role==='admin') return true;
-      const c=document.getElementById('content'); c.innerHTML='';
-      c.append(h('div',{class:'container'}, h('div',{class:'section'}, h('div',{class:'hd'}, h('strong',{},'Access denied')), h('div',{class:'bd'}, h('p',{class:'small'},'Admin only.'), h('button',{class:'btn',onClick:()=>{promptLogin(); location.reload();}},'Sign in as Admin')))));
-      return false; }
-
-    function renderAdmin(){ const courses=getCourses(); const c=document.getElementById('content'); c.innerHTML='';
-      const ta=h('textarea',{class:'mono',style:'width:100%;height:480px'}, JSON.stringify(courses,null,2));
-      const save=h('button',{class:'btn',onClick:()=>{ try{ const parsed=JSON.parse(ta.value); if(!Array.isArray(parsed)) throw new Error('Expected array'); setCourses(parsed); alert('Saved!'); }catch(e){ alert('Invalid JSON: '+e.message); } }}, 'Save JSON');
-      c.append(h('div',{class:'container'}, h('h2',{},'Admin (Catalog JSON)'), h('p',{class:'small'},'Only admins can update course data.'), ta, h('div',{style:'margin-top:8px'}, save) ));
+    function boot(){ const app=document.getElementById('app'); app.innerHTML=''; app.append(topbar('Author Guide')); const c=document.getElementById('content'); c.innerHTML='';
+      const template = {"id":"example-course","title":"Example Course","category":"General","level":"Beginner","summary":"Short course summary","hero":"https://example.com/hero.jpg","modules":[{"id":"module-1","title":"Module 1","lessons":[{"id":"lesson-1","title":"Lesson 1","contentHTML":"<p>Your HTML content here</p>"}]}]};
+      c.append(h('div',{class:'container'}, h('div',{class:'section'}, h('div',{class:'hd'}, h('strong',{},'Author Submission Guide')), h('div',{class:'bd'}, h('ol',{}, h('li',{},'Download the JSON template below.'), h('li',{},'Fill in your course content (IDs must be URL-safe: lowercase, numbers, dashes).'), h('li',{},'Send it to the site admin for review and publishing.')), h('p',{class:'small'},'Tip: Use basic HTML in lesson content (paragraphs, lists, links).'), h('h3',{},'JSON Template'), h('pre',{class:'mono',style:'white-space:pre-wrap;background:#fafafa;border:1px solid #e6e7e8;padding:12px;border-radius:12px'}, JSON.stringify(template, null, 2)) )) ));
+      document.body.append(h('footer',{}, h('div',{class:'container'}, '© ', new Date().getFullYear(), ' Lumera')));
     }
-
-    function boot(){ document.getElementById('app').append(topbar('Lumera Admin')); if(guardAdmin()) renderAdmin(); }
     document.addEventListener('DOMContentLoaded', boot);
   </script>
 </body>

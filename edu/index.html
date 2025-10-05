@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Lumera Education Portal — Catalog</title>
+
   <style>
     *{box-sizing:border-box}html,body{margin:0;padding:0;font-family:system-ui,Segoe UI,Roboto,Inter,Arial,sans-serif;background:#f6f7f8;color:#111}
     a{color:inherit;text-decoration:none}
@@ -21,96 +22,69 @@
     .progress{height:8px;background:#eceff1;border-radius:999px;overflow:hidden}
     .progress > div{height:100%;background:#10b981}
     .small{font-size:12px;color:#555}
+    .mono{font-family:ui-monospace,Consolas,Menlo,monospace}
     footer{border-top:1px solid #e6e7e8;padding:32px;margin-top:48px;color:#555}
+    /* Course page */
+    .grid-course{display:grid;grid-template-columns:320px 1fr;gap:18px}
+    .section{background:#fff;border:1px solid #e6e7e8;border-radius:16px}
+    .section .hd{padding:12px 16px;border-bottom:1px solid #e6e7e8;display:flex;align-items:center;gap:8px}
+    .section .bd{padding:16px}
+    .syllabus ul{list-style:none;margin:0;padding:0}
+    .syllabus li{margin:0;padding:4px 0}
+    .lesson-btn{width:100%;text-align:left;padding:8px 10px;border:1px solid #e6e7e8;border-radius:10px;background:#fff;cursor:pointer}
+    .lesson-btn.active{border-color:#10b981;background:#ecfdf5}
+    .prose p, .prose ul, .prose ol, .prose pre, .prose h3, .prose h4 { margin: 0 0 10px 0; }
+    .prose ul { padding-left: 18px; }
+    .toolbar{display:flex;gap:8px;align-items:center}
   </style>
+
 </head>
 <body>
   <div id="app"></div>
   <script>
-    const ACCESS_KEYS=[{id:"admin-demo",role:"admin",key:"LUMERA-ADMIN-KEY-EXAMPLE"},{id:"author-demo",role:"author",key:"LUMERA-AUTHOR-KEY-EXAMPLE"}];
-    function getAuth(){ try{ return JSON.parse(localStorage.getItem("lumera.auth")) || {role:"viewer"} }catch{ return {role:"viewer"} } }
-    function setAuth(a){ localStorage.setItem("lumera.auth", JSON.stringify(a)); }
-    function promptLogin(){ const k=prompt("Enter your Lumera user key:"); if(!k) return getAuth(); const f=ACCESS_KEYS.find(x=>x.key===k.trim()); if(f){ const next={role:f.role,keyId:f.id}; setAuth(next); alert("Signed in as "+f.role); return next;} alert("Invalid key"); return getAuth(); }
-    (function(){ try{ const p=new URLSearchParams(location.search); const k=p.get("key"); if(k){ const f=ACCESS_KEYS.find(x=>x.key===k.trim()); if(f){ setAuth({role:f.role,keyId:f.id}); } history.replaceState({}, document.title, location.pathname + location.hash);} }catch{} })();
+
+    const ACCESS_KEYS=[{id:'admin-demo',role:'admin',key:'LUMERA-ADMIN-KEY-EXAMPLE'}];
+    function getAuth(){ try{ return JSON.parse(localStorage.getItem('lumera.auth')) || {role:'viewer'} }catch{ return {role:'viewer'} } }
+    function setAuth(a){ localStorage.setItem('lumera.auth', JSON.stringify(a)); }
+    function promptLogin(){ const k=prompt('Enter your Lumera user key:'); if(!k) return getAuth(); const f=ACCESS_KEYS.find(x=>x.key===k.trim()); if(f){ const next={role:f.role,keyId:f.id}; setAuth(next); alert('Signed in as '+f.role); return next;} alert('Invalid key'); return getAuth(); }
+    (function(){ try{ const p=new URLSearchParams(location.search); const k=p.get('key'); if(k){ const f=ACCESS_KEYS.find(x=>x.key===k.trim()); if(f){ setAuth({role:f.role,keyId:f.id}); } history.replaceState({}, document.title, location.pathname + location.hash);} }catch{} })();
 
     function h(tag, attrs={}, ...children){
       const el=document.createElement(tag);
       for(const k in attrs){ const v=attrs[k];
-        if(k==="class") el.className=v;
-        else if(k==="style"&&typeof v==="object") Object.assign(el.style,v);
-        else if(k.startsWith("on")&&typeof v==="function") el.addEventListener(k.slice(2).toLowerCase(), v);
+        if(k==='class') el.className=v;
+        else if(k==='style'&&typeof v==='object') Object.assign(el.style,v);
+        else if(k.startsWith('on')&&typeof v==='function') el.addEventListener(k.slice(2).toLowerCase(), v);
         else el.setAttribute(k,v);
       }
       children.flat().forEach(c=>el.append(c instanceof Node?c:document.createTextNode(c)));
       return el;
     }
-    function topbar(){
-      const auth=getAuth(); const role=auth&&auth.role?auth.role:"viewer";
-      return h("div",{class:"topbar"},
-        h("div",{class:"inner"},
-          h("div",{class:"logo"},"L"),
-          h("a",{href:"index.html"}, h("strong",{},"Lumera Education Portal")),
-          h("div",{style:{flex:1}}),
-          h("a",{class:"btn",href:"index.html"},"Catalog"),
-          ((role==="author"||role==="admin")) ? h("a",{class:"btn",href:"studio.html"},"Studio") : null,
-          (role==="admin") ? h("a",{class:"btn",href:"admin.html"},"Admin") : null,
-          h("div",{class:"nav"},
-            h("span",{class:"small"},"Role: "+role),
-            role==="viewer"
-              ? h("button",{class:"btn",onClick:()=>{promptLogin(); location.reload();}},"Sign in")
-              : h("button",{class:"btn",onClick:()=>{ if(confirm('Sign out?')){ setAuth({role:'viewer'}); location.reload(); } }},"Sign out")
+    function topbar(title){
+      const role=(getAuth().role)||'viewer';
+      return h('div',{class:'topbar'},
+        h('div',{class:'inner'},
+          h('div',{class:'logo'},'L'),
+          h('a',{href:'index.html'}, h('strong',{}, title||'Lumera Education Portal')),
+          h('div',{style:{flex:1}}),
+          h('a',{class:'btn',href:'index.html'},'Catalog'),
+          role==='admin' ? h('a',{class:'btn',href:'admin.html'},'Admin') : h('a',{class:'btn',href:'author-guide.html'},'Authors'),
+          h('div',{class:'nav'},
+            h('span',{class:'small'},'Role: '+role),
+            role==='viewer'
+              ? h('button',{class:'btn',onClick:()=>{promptLogin(); location.reload();}},'Sign in')
+              : h('button',{class:'btn',onClick:()=>{ if(confirm('Sign out?')){ setAuth({role:'viewer'}); location.reload(); } }},'Sign out')
           )
         )
       );
     }
 
-    function getCourses(){
-      try{ const v=localStorage.getItem("lumera.courses"); if(v) return JSON.parse(v); }catch{}
-      return [{
-        id:"getting-started",
-        title:"Getting Started (Template)",
-        category:"Onboarding",
-        level:"Beginner",
-        durationMinutes:15,
-        summary:"A blank template to demonstrate how to structure a course. Replace with your own content.",
-        hero:"https://images.unsplash.com/photo-1523246191544-74961f7f9ab9?q=80&w=1600&auto=format&fit=crop",
-        modules:[{ id:"module-1", title:"Module 1 (Rename Me)", lessons:[{ id:"lesson-1", title:"Lesson 1 (Write your content)", contentHTML:"<p>This is a placeholder lesson. Open Studio to edit.</p>"}]}]
-      }];
-    }
-    function getProgress(cid){ try{ const v=localStorage.getItem("lumera.progress."+cid); if(v) return JSON.parse(v);}catch{} return {completed:{},quiz:null}; }
-    function progressPercent(p, course){ const total=(course.modules||[]).reduce((a,m)=>a+(m.lessons||[]).length,0); const done=Object.values(p.completed||{}).filter(Boolean).length; return total?Math.round((done/total)*100):0; }
-
-    function catalog(){
-      const grid = h("div",{class:"grid-cards"});
-      const courses = getCourses();
-      courses.forEach(c=>{
-        const pct = progressPercent(getProgress(c.id), c);
-        const card = h("div",{class:"card"},
-          c.hero ? h("div",{class:"media",style:{backgroundImage:`url(${c.hero})`}}) : null,
-          h("div",{class:"body"},
-            h("div",{}, h("span",{class:"badge"},c.category||"General"), " ", c.level ? h("span",{class:"badge"},c.level) : null),
-            h("h3",{style:{marginTop:'6px',fontSize:'18px'}}, c.title),
-            h("p",{class:"small",style:{marginTop:'4px'}}, c.summary||""),
-            h("div",{class:"progress",style:{marginTop:'8px'}}, h("div",{style:{width:pct+'%'}}))
-          )
-        );
-        const link = h("a",{ href:`course.html?course=${encodeURIComponent(c.id)}`, style:{display:"block"} }, card);
-        grid.append(link);
-      });
-      return grid;
-    }
-
-    function boot(){
-      const app=document.getElementById("app"); app.innerHTML="";
-      app.append(topbar());
-      app.append(h("div",{class:"container"},
-        h("h2",{},"Course Catalog"),
-        h("p",{class:"small"},"Click a course to open it. Your progress saves automatically."),
-        catalog()
-      ));
-      document.body.append(h("footer",{}, h("div",{class:"container"},"© ", new Date().getFullYear(), " Lumera")));
-    }
-    document.addEventListener("DOMContentLoaded", boot);
+    function getCourses(){ try{ const v=localStorage.getItem('lumera.courses'); if(v) return JSON.parse(v); }catch{} return [{ id:'getting-started', title:'Getting Started (Template)', category:'Onboarding', level:'Beginner', durationMinutes:15, summary:'A blank template to demonstrate how to structure a course. Replace with your own content.', hero:'https://images.unsplash.com/photo-1523246191544-74961f7f9ab9?q=80&w=1600&auto=format&fit=crop', modules:[{ id:'module-1', title:'Module 1 (Rename Me)', lessons:[{ id:'lesson-1', title:'Lesson 1 (Write your content)', contentHTML:'<p>This is a placeholder lesson. Ask the admin to update the catalog.</p>' }]}] }]; }
+    function getProgress(cid){ try{ const v=localStorage.getItem('lumera.progress.'+cid); if(v) return JSON.parse(v); }catch{} return {completed:{},quiz:null}; }
+    function progressPercent(p, c){ const t=(c.modules||[]).reduce((a,m)=>a+(m.lessons||[]).length,0); const d=Object.values(p.completed||{}).filter(Boolean).length; return t?Math.round((d/t)*100):0; }
+    function catalog(){ const grid=h('div',{class:'grid-cards'}); const cs=getCourses(); cs.forEach(c=>{ const pct=progressPercent(getProgress(c.id), c); const card=h('div',{class:'card'}, c.hero?h('div',{class:'media',style:{backgroundImage:`url(${c.hero})`}}):null, h('div',{class:'body'}, h('div',{}, h('span',{class:'badge'},c.category||'General'), ' ', c.level?h('span',{class:'badge'},c.level):null), h('h3',{style:{marginTop:'6px',fontSize:'18px'}}, c.title), h('p',{class:'small',style:{marginTop:'4px'}}, c.summary||''), h('div',{class:'progress',style:{marginTop:'8px'}}, h('div',{style:{width:pct+'%'}})) )); const link=h('a',{href:`course.html?course=${encodeURIComponent(c.id)}`,style:{display:'block'}}, card); grid.append(link); }); return grid; }
+    function boot(){ const app=document.getElementById('app'); app.innerHTML=''; app.append(topbar('Lumera Education Portal')); app.append(h('div',{class:'container'}, h('h2',{},'Course Catalog'), h('p',{class:'small'},'Click a course to open it. Only admins can update content.'), catalog())); document.body.append(h('footer',{}, h('div',{class:'container'},'© ', new Date().getFullYear(), ' Lumera'))); }
+    document.addEventListener('DOMContentLoaded', boot);
   </script>
 </body>
 </html>
