@@ -36,6 +36,10 @@
     .prose p, .prose ul, .prose ol, .prose pre, .prose h3, .prose h4 { margin: 0 0 10px 0; }
     .prose ul { padding-left: 18px; }
     .toolbar{display:flex;gap:8px;align-items:center}
+    .prose img{max-width:100%;height:auto;border-radius:12px;display:block;margin:8px 0;box-shadow:0 1px 8px rgba(0,0,0,.05)}
+    .embed{position:relative;width:100%;padding-top:56.25%;background:#000;border-radius:12px;overflow:hidden;margin:8px 0;box-shadow:0 1px 8px rgba(0,0,0,.08)}
+    .embed iframe,.embed video{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+    .caption{font-size:12px;color:#555;margin-top:6px}
   </style>
 
 </head>
@@ -80,9 +84,68 @@
       );
     }
 
+    async function loadCourses(){
+      try {
+        const res = await fetch('courses.json', {cache:'no-store'});
+        if (res.ok) {
+          const json = await res.json();
+          if (Array.isArray(json)) return json;
+        }
+      } catch (e) {}
+      try {
+        const v = localStorage.getItem('lumera.courses');
+        if (v) {
+          const parsed = JSON.parse(v);
+          if (Array.isArray(parsed)) return parsed;
+        }
+      } catch (e) {}
+      return [{"id": "calculus-i", "title": "Calculus I: Limits & Derivatives", "category": "Mathematics", "level": "Beginner", "durationMinutes": 120, "summary": "Start calculus from first principles: limits, derivative definition, and core rules with applications. Includes images and video embeds.", "hero": "https://images.unsplash.com/photo-1529101091764-c3526daf38fe?q=80&w=1600&auto=format&fit=crop", "modules": [{"id": "calculus-basics", "title": "Calculus Basics: Limits & Derivatives", "lessons": [{"id": "limits-intro", "title": "What is a Limit? (with media)", "contentHTML": "<h3>Idea</h3><p>The limit of f(x) as x approaches a means: what value does f(x) get close to?</p><div class=\\\"embed\\\"><iframe src=\\\"https://www.youtube.com/embed/3d6DsjIBzJ4\\\" title=\\\"Intro to Limits\\\" allowfullscreen></iframe></div><div class=\\\"caption\\\">Video: Intro to Limits</div><img src=\\\"https://images.unsplash.com/photo-1517976487492-576ea84ee09a?q=80&w=1600&auto=format&fit=crop\\\" alt=\\\"Graph\\\"/><div class=\\\"caption\\\">A conceptual graph illustration.</div><p>Try: lim_{{x\u21922}} (x^2-4)/(x-2)</p>"}, {"id": "derivative-definition", "title": "Derivative as a Limit", "contentHTML": "<pre>f\\'(x) = lim_{{h\u21920}} [f(x+h) - f(x)] / h</pre>"}]}]}];
+    }
+
+    function getProgress(cid){ try{ const v=localStorage.getItem('lumera.progress.'+cid); if(v) return JSON.parse(v); }catch{} return {completed:{},quiz:null}; }
+    function progressPercent(p, c){ const t=(c.modules||[]).reduce((a,m)=>a+(m.lessons||[]).length,0); const d=Object.values(p.completed||{}).filter(Boolean).length; return t?Math.round((d/t)*100):0; }
+
     function boot(){ const app=document.getElementById('app'); app.innerHTML=''; app.append(topbar('Author Guide')); const c=document.getElementById('content'); c.innerHTML='';
-      const template = {"id":"example-course","title":"Example Course","category":"General","level":"Beginner","summary":"Short course summary","hero":"https://example.com/hero.jpg","modules":[{"id":"module-1","title":"Module 1","lessons":[{"id":"lesson-1","title":"Lesson 1","contentHTML":"<p>Your HTML content here</p>"}]}]};
-      c.append(h('div',{class:'container'}, h('div',{class:'section'}, h('div',{class:'hd'}, h('strong',{},'Author Submission Guide')), h('div',{class:'bd'}, h('ol',{}, h('li',{},'Download the JSON template below.'), h('li',{},'Fill in your course content (IDs must be URL-safe: lowercase, numbers, dashes).'), h('li',{},'Send it to the site admin for review and publishing.')), h('p',{class:'small'},'Tip: Use basic HTML in lesson content (paragraphs, lists, links).'), h('h3',{},'JSON Template'), h('pre',{class:'mono',style:'white-space:pre-wrap;background:#fafafa;border:1px solid #e6e7e8;padding:12px;border-radius:12px'}, JSON.stringify(template, null, 2)) )) ));
+      const template = {
+  "id": "calculus-i",
+  "title": "Calculus I: Limits & Derivatives",
+  "category": "Mathematics",
+  "level": "Beginner",
+  "durationMinutes": 120,
+  "summary": "Start calculus from first principles: limits, derivative definition, and core rules with applications. Includes images and video embeds.",
+  "hero": "https://images.unsplash.com/photo-1529101091764-c3526daf38fe?q=80&w=1600&auto=format&fit=crop",
+  "modules": [
+    {
+      "id": "calculus-basics",
+      "title": "Calculus Basics: Limits & Derivatives",
+      "lessons": [
+        {
+          "id": "limits-intro",
+          "title": "What is a Limit? (with media)",
+          "contentHTML": "<h3>Idea</h3><p>The limit of f(x) as x approaches a means: what value does f(x) get close to?</p><div class=\\\"embed\\\"><iframe src=\\\"https://www.youtube.com/embed/3d6DsjIBzJ4\\\" title=\\\"Intro to Limits\\\" allowfullscreen></iframe></div><div class=\\\"caption\\\">Video: Intro to Limits</div><img src=\\\"https://images.unsplash.com/photo-1517976487492-576ea84ee09a?q=80&w=1600&auto=format&fit=crop\\\" alt=\\\"Graph\\\"/><div class=\\\"caption\\\">A conceptual graph illustration.</div><p>Try: lim_{{x\u21922}} (x^2-4)/(x-2)</p>"
+        },
+        {
+          "id": "derivative-definition",
+          "title": "Derivative as a Limit",
+          "contentHTML": "<pre>f\\'(x) = lim_{{h\u21920}} [f(x+h) - f(x)] / h</pre>"
+        }
+      ]
+    }
+  ]
+};
+      c.append(h('div',{class:'container'},
+        h('div',{class:'section'}, h('div',{class:'hd'}, h('strong',{},'Author Submission Guide')),
+          h('div',{class:'bd'},
+            h('ol',{}, 
+              h('li',{},'Duplicate the template JSON below for each course.'),
+              h('li',{},'IDs must be URL-safe: lowercase, numbers, dashes.'),
+              h('li',{},'Send the final courses.json to the site admin to publish on the server next to index.html.')
+            ),
+            h('h3',{},'Template'),
+            h('pre',{class:'mono',style:'white-space:pre-wrap;background:#fafafa;border:1px solid #e6e7e8;padding:12px;border-radius:12px'}, JSON.stringify([template], null, 2))
+          )
+        )
+      ));
       document.body.append(h('footer',{}, h('div',{class:'container'}, '© ', new Date().getFullYear(), ' Lumera')));
     }
     document.addEventListener('DOMContentLoaded', boot);

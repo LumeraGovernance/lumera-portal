@@ -36,6 +36,10 @@
     .prose p, .prose ul, .prose ol, .prose pre, .prose h3, .prose h4 { margin: 0 0 10px 0; }
     .prose ul { padding-left: 18px; }
     .toolbar{display:flex;gap:8px;align-items:center}
+    .prose img{max-width:100%;height:auto;border-radius:12px;display:block;margin:8px 0;box-shadow:0 1px 8px rgba(0,0,0,.05)}
+    .embed{position:relative;width:100%;padding-top:56.25%;background:#000;border-radius:12px;overflow:hidden;margin:8px 0;box-shadow:0 1px 8px rgba(0,0,0,.08)}
+    .embed iframe,.embed video{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+    .caption{font-size:12px;color:#555;margin-top:6px}
   </style>
 
 </head>
@@ -80,19 +84,42 @@
       );
     }
 
+    async function loadCourses(){
+      try {
+        const res = await fetch('courses.json', {cache:'no-store'});
+        if (res.ok) {
+          const json = await res.json();
+          if (Array.isArray(json)) return json;
+        }
+      } catch (e) {}
+      try {
+        const v = localStorage.getItem('lumera.courses');
+        if (v) {
+          const parsed = JSON.parse(v);
+          if (Array.isArray(parsed)) return parsed;
+        }
+      } catch (e) {}
+      return [{"id": "calculus-i", "title": "Calculus I: Limits & Derivatives", "category": "Mathematics", "level": "Beginner", "durationMinutes": 120, "summary": "Start calculus from first principles: limits, derivative definition, and core rules with applications. Includes images and video embeds.", "hero": "https://images.unsplash.com/photo-1529101091764-c3526daf38fe?q=80&w=1600&auto=format&fit=crop", "modules": [{"id": "calculus-basics", "title": "Calculus Basics: Limits & Derivatives", "lessons": [{"id": "limits-intro", "title": "What is a Limit? (with media)", "contentHTML": "<h3>Idea</h3><p>The limit of f(x) as x approaches a means: what value does f(x) get close to?</p><div class=\\\"embed\\\"><iframe src=\\\"https://www.youtube.com/embed/3d6DsjIBzJ4\\\" title=\\\"Intro to Limits\\\" allowfullscreen></iframe></div><div class=\\\"caption\\\">Video: Intro to Limits</div><img src=\\\"https://images.unsplash.com/photo-1517976487492-576ea84ee09a?q=80&w=1600&auto=format&fit=crop\\\" alt=\\\"Graph\\\"/><div class=\\\"caption\\\">A conceptual graph illustration.</div><p>Try: lim_{{x\u21922}} (x^2-4)/(x-2)</p>"}, {"id": "derivative-definition", "title": "Derivative as a Limit", "contentHTML": "<pre>f\\'(x) = lim_{{h\u21920}} [f(x+h) - f(x)] / h</pre>"}]}]}];
+    }
+
+    function getProgress(cid){ try{ const v=localStorage.getItem('lumera.progress.'+cid); if(v) return JSON.parse(v); }catch{} return {completed:{},quiz:null}; }
+    function progressPercent(p, c){ const t=(c.modules||[]).reduce((a,m)=>a+(m.lessons||[]).length,0); const d=Object.values(p.completed||{}).filter(Boolean).length; return t?Math.round((d/t)*100):0; }
+
     function getAuth(){ try{ return JSON.parse(localStorage.getItem('lumera.auth')) || {role:'viewer'} }catch{ return {role:'viewer'} } }
-    function getCourses(){ try{const v=localStorage.getItem('lumera.courses'); if(v) return JSON.parse(v);}catch{} return []; }
-    function setCourses(list){ localStorage.setItem('lumera.courses', JSON.stringify(list)); }
+    function getCoursesLS(){ try{const v=localStorage.getItem('lumera.courses'); if(v) return JSON.parse(v);}catch{} return []; }
+    function setCoursesLS(list){ localStorage.setItem('lumera.courses', JSON.stringify(list)); }
 
     function guardAdmin(){ const role=getAuth().role; if(role==='admin') return true;
       const c=document.getElementById('content'); c.innerHTML='';
       c.append(h('div',{class:'container'}, h('div',{class:'section'}, h('div',{class:'hd'}, h('strong',{},'Access denied')), h('div',{class:'bd'}, h('p',{class:'small'},'Admin only.'), h('button',{class:'btn',onClick:()=>{promptLogin(); location.reload();}},'Sign in as Admin')))));
       return false; }
 
-    function renderAdmin(){ const courses=getCourses(); const c=document.getElementById('content'); c.innerHTML='';
-      const ta=h('textarea',{class:'mono',style:'width:100%;height:480px'}, JSON.stringify(courses,null,2));
-      const save=h('button',{class:'btn',onClick:()=>{ try{ const parsed=JSON.parse(ta.value); if(!Array.isArray(parsed)) throw new Error('Expected array'); setCourses(parsed); alert('Saved!'); }catch(e){ alert('Invalid JSON: '+e.message); } }}, 'Save JSON');
-      c.append(h('div',{class:'container'}, h('h2',{},'Admin (Catalog JSON)'), h('p',{class:'small'},'Only admins can update course data.'), ta, h('div',{style:'margin-top:8px'}, save) ));
+    function renderAdmin(){ const courses=getCoursesLS(); const c=document.getElementById('content'); c.innerHTML='';
+      const ta=h('textarea',{class:'mono',style:'width:100%;height:420px'}, JSON.stringify(courses,null,2));
+      const save=h('button',{class:'btn',onClick:()=>{ try{ const parsed=JSON.parse(ta.value); if(!Array.isArray(parsed)) throw new Error('Expected array'); setCoursesLS(parsed); alert('Saved to localStorage!'); }catch(e){ alert('Invalid JSON: '+e.message); } }}, 'Save to localStorage');
+      const exp=h('button',{class:'btn',onClick:()=>{ const blob=new Blob([ta.value],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='courses.json'; a.click(); URL.revokeObjectURL(url); }}, 'Download courses.json');
+      const imp=h('button',{class:'btn',onClick:()=>{ const input=document.createElement('input'); input.type='file'; input.accept='application/json'; input.onchange=()=>{ const file=input.files&&input.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try{ const parsed=JSON.parse(String(reader.result)); if(!Array.isArray(parsed)) throw new Error('Expected array'); ta.value=JSON.stringify(parsed,null,2); }catch(e){ alert('Invalid JSON: '+e.message);} }; reader.readAsText(file); }; input.click(); }}, 'Load JSON file…');
+      c.append(h('div',{class:'container'}, h('h2',{},'Admin (Catalog JSON)'), h('p',{class:'small'},'Note: This page writes to localStorage. To make changes public for everyone (including incognito users), place the downloaded courses.json next to index.html on your server.'), ta, h('div',{style:'margin-top:8px;display:flex;gap:8px;flex-wrap:wrap'}, save, exp, imp) ));
     }
 
     function boot(){ document.getElementById('app').append(topbar('Lumera Admin')); if(guardAdmin()) renderAdmin(); }

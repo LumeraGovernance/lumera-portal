@@ -36,6 +36,10 @@
     .prose p, .prose ul, .prose ol, .prose pre, .prose h3, .prose h4 { margin: 0 0 10px 0; }
     .prose ul { padding-left: 18px; }
     .toolbar{display:flex;gap:8px;align-items:center}
+    .prose img{max-width:100%;height:auto;border-radius:12px;display:block;margin:8px 0;box-shadow:0 1px 8px rgba(0,0,0,.05)}
+    .embed{position:relative;width:100%;padding-top:56.25%;background:#000;border-radius:12px;overflow:hidden;margin:8px 0;box-shadow:0 1px 8px rgba(0,0,0,.08)}
+    .embed iframe,.embed video{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+    .caption{font-size:12px;color:#555;margin-top:6px}
   </style>
 
 </head>
@@ -79,28 +83,116 @@
       );
     }
 
-    function getCourses(){ try{ const v=localStorage.getItem('lumera.courses'); if(v) return JSON.parse(v); }catch{} return []; }
-    function getProgress(id){ try{ const v=localStorage.getItem('lumera.progress.'+id); if(v) return JSON.parse(v); }catch{} return {completed:{},quiz:null}; }
+    async function loadCourses(){
+      try {
+        const res = await fetch('courses.json', {cache:'no-store'});
+        if (res.ok) {
+          const json = await res.json();
+          if (Array.isArray(json)) return json;
+        }
+      } catch (e) {}
+      try {
+        const v = localStorage.getItem('lumera.courses');
+        if (v) {
+          const parsed = JSON.parse(v);
+          if (Array.isArray(parsed)) return parsed;
+        }
+      } catch (e) {}
+      return [{"id": "calculus-i", "title": "Calculus I: Limits & Derivatives", "category": "Mathematics", "level": "Beginner", "durationMinutes": 120, "summary": "Start calculus from first principles: limits, derivative definition, and core rules with applications. Includes images and video embeds.", "hero": "https://images.unsplash.com/photo-1529101091764-c3526daf38fe?q=80&w=1600&auto=format&fit=crop", "modules": [{"id": "calculus-basics", "title": "Calculus Basics: Limits & Derivatives", "lessons": [{"id": "limits-intro", "title": "What is a Limit? (with media)", "contentHTML": "<h3>Idea</h3><p>The limit of f(x) as x approaches a means: what value does f(x) get close to?</p><div class=\\\"embed\\\"><iframe src=\\\"https://www.youtube.com/embed/3d6DsjIBzJ4\\\" title=\\\"Intro to Limits\\\" allowfullscreen></iframe></div><div class=\\\"caption\\\">Video: Intro to Limits</div><img src=\\\"https://images.unsplash.com/photo-1517976487492-576ea84ee09a?q=80&w=1600&auto=format&fit=crop\\\" alt=\\\"Graph\\\"/><div class=\\\"caption\\\">A conceptual graph illustration.</div><p>Try: lim_{{x\u21922}} (x^2-4)/(x-2)</p>"}, {"id": "derivative-definition", "title": "Derivative as a Limit", "contentHTML": "<pre>f\\'(x) = lim_{{h\u21920}} [f(x+h) - f(x)] / h</pre>"}]}]}];
+    }
+
+    function getProgress(cid){ try{ const v=localStorage.getItem('lumera.progress.'+cid); if(v) return JSON.parse(v); }catch{} return {completed:{},quiz:null}; }
+    function progressPercent(p, c){ const t=(c.modules||[]).reduce((a,m)=>a+(m.lessons||[]).length,0); const d=Object.values(p.completed||{}).filter(Boolean).length; return t?Math.round((d/t)*100):0; }
+
+    function getParam(n){ return new URLSearchParams(location.search).get(n); }
     function setProgress(id, val){ localStorage.setItem('lumera.progress.'+id, JSON.stringify(val)); }
     function lessonKey(c,m,l){ return c+'|'+m+'|'+l; }
     function markLessonComplete(cid, mid, lid, val){ const cur=getProgress(cid); cur.completed[lessonKey(cid,mid,lid)]=!!val; setProgress(cid,cur); }
-    function progressPercent(p,c){ const t=(c.modules||[]).reduce((a,m)=>a+(m.lessons||[]).length,0); const d=Object.values(p.completed||{}).filter(Boolean).length; return t?Math.round((d/t)*100):0; }
-    function getParam(n){ return new URLSearchParams(location.search).get(n); }
 
-    function renderCourse(){ const id=getParam('course'); const all=getCourses(); const course=all.find(c=>c.id===id); const wrap=h('div',{class:'container'});
-      if(!course){ wrap.append(h('div',{class:'section'}, h('div',{class:'hd'}, h('strong',{},'Course not found')), h('div',{class:'bd'}, h('p',{},'We couldn\u2019t find a course with id: ', h('code',{}, String(id||''))), h('p',{}, 'Go back to ', h('a',{href:'index.html'}, 'Catalog'), ' or contact the site admin.')))); return wrap; }
-      const p=getProgress(course.id); const pct=progressPercent(p,course);
-      wrap.append(h('div',{class:'card'}, course.hero?h('div',{style:{height:'180px',background:`url(${course.hero}) center/cover no-repeat`}}):null, h('div',{style:{padding:'14px 16px'}}, h('div',{}, h('span',{class:'badge'}, course.category||'General'), course.level ? ' '+(h('span',{class:'badge'}, course.level).outerHTML) : ''), h('h2',{style:{margin:'8px 0 4px 0'}}, course.title), h('p',{class:'small'}, course.summary||''), h('div',{class:'progress',style:{marginTop:'8px'}}, h('div',{style:{width:pct+'%'}})) )));
-      const grid=h('div',{class:'grid-course', style:{marginTop:'16px'}}); const left=h('div',{}); const right=h('div',{});
-      const syllabus=h('div',{class:'section syllabus'}, h('div',{class:'hd'}, h('strong',{},'Syllabus')), h('div',{class:'bd'})); const sylBody=syllabus.querySelector('.bd');
-      const content=h('div',{class:'section'}, h('div',{class:'hd'}, h('div',{class:'toolbar'}, h('a',{class:'btn',href:'index.html'},'\u2190 Back'), h('span',{class:'small'},'Lesson content'))), h('div',{class:'bd prose',id:'lesson-content'}, h('p',{},'Select a lesson on the left to view its content.')));
-      function openLesson(mid,l){ const pane=document.getElementById('lesson-content'); pane.innerHTML=''; pane.append(h('h3',{}, l.title), h('div',{class:'small',style:{margin:'6px 0 8px 0'}}, 'Module: ', mid), (function(){ const d=document.createElement('div'); d.innerHTML=l.contentHTML||'<p>No content.</p>'; return d; })(), h('div',{style:{marginTop:'12px',display:'flex',gap:'8px'}}, h('button',{class:'btn',onClick:()=>{ markLessonComplete(course.id, mid, l.id, true); location.reload(); }},'Mark Complete'), h('button',{class:'btn',onClick:()=>{ markLessonComplete(course.id, mid, l.id, false); location.reload(); }},'Unmark') )); sylBody.querySelectorAll('.lesson-btn').forEach(b=>b.classList.remove('active')); const active=sylBody.querySelector(`[data-lesson-id="${l.id}"][data-module-id="${mid}"]`); if(active) active.classList.add('active'); }
-      (course.modules||[]).forEach(m=>{ sylBody.append(h('div',{style:{fontWeight:'600', margin:'4px 0 6px 0'}}, m.title)); (m.lessons||[]).forEach(l=>{ const done=!!p.completed[lessonKey(course.id,m.id,l.id)]; sylBody.append(h('div',{style:{margin:'4px 0 8px 0'}}, h('button',{ class:'lesson-btn'+(done?' active':''), 'data-lesson-id': l.id, 'data-module-id': m.id, onClick:()=>openLesson(m.id, l) }, (done?'\u2705 ':'\ud83d\udcd8 '), l.title))); }); });
-      left.append(syllabus); right.append(content); grid.append(left,right); wrap.append(grid); return wrap;
+    function renderCourse(course){
+      const wrap=h('div',{class:'container'});
+      const progress = getProgress(course.id);
+      const pct = progressPercent(progress, course);
+
+      wrap.append(
+        h('div',{class:'card'},
+          course.hero ? h('div',{style:{height:'180px',background:`url(${course.hero}) center/cover no-repeat`}}) : null,
+          h('div',{style:{padding:'14px 16px'}},
+            h('div',{}, h('span',{class:'badge'}, course.category || 'General'), course.level ? ' '+(h('span',{class:'badge'}, course.level).outerHTML) : '' ),
+            h('h2',{style:{margin:'8px 0 4px 0'}}, course.title),
+            h('p',{class:'small'}, course.summary || ''),
+            h('div',{class:'progress',style:{marginTop:'8px'}}, h('div',{style:{width:pct+'%'}}))
+          )
+        )
+      );
+
+      const grid = h('div',{class:'grid-course', style:{marginTop:'16px'}});
+      const left = h('div',{});
+      const right = h('div',{});
+
+      const syllabus = h('div',{class:'section syllabus'}, h('div',{class:'hd'}, h('strong',{},'Syllabus')), h('div',{class:'bd'}));
+      const sylBody = syllabus.querySelector('.bd');
+
+      const content = h('div',{class:'section'},
+        h('div',{class:'hd'}, h('div',{class:'toolbar'}, h('a',{class:'btn',href:'index.html'},'\u2190 Back'), h('span',{class:'small'},'Lesson content'))),
+        h('div',{class:'bd prose', id:'lesson-content'}, h('p',{},'Select a lesson on the left to view its content.'))
+      );
+
+      function openLesson(moduleId, l){
+        const pane = document.getElementById('lesson-content');
+        pane.innerHTML = '';
+        pane.append(
+          h('h3',{}, l.title),
+          h('div',{class:'small', style:{margin:'6px 0 8px 0'}}, 'Module: ', moduleId),
+          (function(){ const d=document.createElement('div'); d.innerHTML = l.contentHTML || '<p>No content.</p>'; return d; })(),
+          h('div',{style:{marginTop:'12px', display:'flex', gap:'8px'}},
+            h('button',{class:'btn', onClick:()=>{ markLessonComplete(course.id, moduleId, l.id, true); location.reload(); }}, 'Mark Complete'),
+            h('button',{class:'btn', onClick:()=>{ markLessonComplete(course.id, moduleId, l.id, false); location.reload(); }}, 'Unmark')
+          )
+        );
+        sylBody.querySelectorAll('.lesson-btn').forEach(b => b.classList.remove('active'));
+        const activeBtn = sylBody.querySelector(`[data-lesson-id=\"${'${'}l.id{'}'}\"][data-module-id=\"${'${'}moduleId{'}'}\"]`);
+        if(activeBtn) activeBtn.classList.add('active');
+      }
+
+      (course.modules||[]).forEach(m=>{
+        sylBody.append(h('div',{style:{fontWeight:'600', margin:'4px 0 6px 0'}}, m.title));
+        (m.lessons||[]).forEach(l=>{
+          const completed = !!progress.completed[lessonKey(course.id, m.id, l.id)];
+          sylBody.append(
+            h('div',{style:{margin:'4px 0 8px 0'}},
+              h('button',{
+                class:'lesson-btn' + (completed ? ' active' : ''),
+                'data-lesson-id': l.id,
+                'data-module-id': m.id,
+                onClick:()=>openLesson(m.id, l)
+              }, (completed ? '\u2705 ' : '\ud83d\udcd8 '), l.title)
+            )
+          );
+        });
+      });
+
+      left.append(syllabus);
+      right.append(content);
+      grid.append(left, right);
+      wrap.append(grid);
+      return wrap;
     }
 
-    function boot(){ const app=document.getElementById('app'); app.innerHTML=''; app.append(topbar('Lumera Course')); app.append(renderCourse()); document.body.append(h('footer',{}, h('div',{class:'container'}, '© ', new Date().getFullYear(), ' Lumera'))); }
-    document.addEventListener('DOMContentLoaded', boot);
+    async function boot(){
+      const app=document.getElementById('app'); app.innerHTML='';
+      app.append(topbar('Lumera Course'));
+      const id = getParam('course');
+      const all = await loadCourses();
+      const course = all.find(c => c.id === id);
+      if(!course){
+        app.append(h('div',{class:'container'}, h('div',{class:'section'}, h('div',{class:'hd'}, h('strong',{},'Course not found')), h('div',{class:'bd'}, h('p',{}, 'We could not find: ', h('code',{}, id||'')), h('p',{}, 'Go back to ', h('a',{href:'index.html'}, 'Catalog')) )) ));
+      } else {
+        app.append(renderCourse(course));
+      }
+      document.body.append(h('footer',{}, h('div',{class:'container'}, '© ', new Date().getFullYear(), ' Lumera')));
+    }
+    document.addEventListener('DOMContentLoaded', ()=>boot());
   </script>
 </body>
 </html>

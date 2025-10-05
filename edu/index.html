@@ -36,6 +36,10 @@
     .prose p, .prose ul, .prose ol, .prose pre, .prose h3, .prose h4 { margin: 0 0 10px 0; }
     .prose ul { padding-left: 18px; }
     .toolbar{display:flex;gap:8px;align-items:center}
+    .prose img{max-width:100%;height:auto;border-radius:12px;display:block;margin:8px 0;box-shadow:0 1px 8px rgba(0,0,0,.05)}
+    .embed{position:relative;width:100%;padding-top:56.25%;background:#000;border-radius:12px;overflow:hidden;margin:8px 0;box-shadow:0 1px 8px rgba(0,0,0,.08)}
+    .embed iframe,.embed video{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+    .caption{font-size:12px;color:#555;margin-top:6px}
   </style>
 
 </head>
@@ -79,12 +83,60 @@
       );
     }
 
-    function getCourses(){ try{ const v=localStorage.getItem('lumera.courses'); if(v) return JSON.parse(v); }catch{} return [{ id:'getting-started', title:'Getting Started (Template)', category:'Onboarding', level:'Beginner', durationMinutes:15, summary:'A blank template to demonstrate how to structure a course. Replace with your own content.', hero:'https://images.unsplash.com/photo-1523246191544-74961f7f9ab9?q=80&w=1600&auto=format&fit=crop', modules:[{ id:'module-1', title:'Module 1 (Rename Me)', lessons:[{ id:'lesson-1', title:'Lesson 1 (Write your content)', contentHTML:'<p>This is a placeholder lesson. Ask the admin to update the catalog.</p>' }]}] }]; }
+    async function loadCourses(){
+      try {
+        const res = await fetch('courses.json', {cache:'no-store'});
+        if (res.ok) {
+          const json = await res.json();
+          if (Array.isArray(json)) return json;
+        }
+      } catch (e) {}
+      try {
+        const v = localStorage.getItem('lumera.courses');
+        if (v) {
+          const parsed = JSON.parse(v);
+          if (Array.isArray(parsed)) return parsed;
+        }
+      } catch (e) {}
+      return [{"id": "calculus-i", "title": "Calculus I: Limits & Derivatives", "category": "Mathematics", "level": "Beginner", "durationMinutes": 120, "summary": "Start calculus from first principles: limits, derivative definition, and core rules with applications. Includes images and video embeds.", "hero": "https://images.unsplash.com/photo-1529101091764-c3526daf38fe?q=80&w=1600&auto=format&fit=crop", "modules": [{"id": "calculus-basics", "title": "Calculus Basics: Limits & Derivatives", "lessons": [{"id": "limits-intro", "title": "What is a Limit? (with media)", "contentHTML": "<h3>Idea</h3><p>The limit of f(x) as x approaches a means: what value does f(x) get close to?</p><div class=\\\"embed\\\"><iframe src=\\\"https://www.youtube.com/embed/3d6DsjIBzJ4\\\" title=\\\"Intro to Limits\\\" allowfullscreen></iframe></div><div class=\\\"caption\\\">Video: Intro to Limits</div><img src=\\\"https://images.unsplash.com/photo-1517976487492-576ea84ee09a?q=80&w=1600&auto=format&fit=crop\\\" alt=\\\"Graph\\\"/><div class=\\\"caption\\\">A conceptual graph illustration.</div><p>Try: lim_{{x\u21922}} (x^2-4)/(x-2)</p>"}, {"id": "derivative-definition", "title": "Derivative as a Limit", "contentHTML": "<pre>f\\'(x) = lim_{{h\u21920}} [f(x+h) - f(x)] / h</pre>"}]}]}];
+    }
+
     function getProgress(cid){ try{ const v=localStorage.getItem('lumera.progress.'+cid); if(v) return JSON.parse(v); }catch{} return {completed:{},quiz:null}; }
     function progressPercent(p, c){ const t=(c.modules||[]).reduce((a,m)=>a+(m.lessons||[]).length,0); const d=Object.values(p.completed||{}).filter(Boolean).length; return t?Math.round((d/t)*100):0; }
-    function catalog(){ const grid=h('div',{class:'grid-cards'}); const cs=getCourses(); cs.forEach(c=>{ const pct=progressPercent(getProgress(c.id), c); const card=h('div',{class:'card'}, c.hero?h('div',{class:'media',style:{backgroundImage:`url(${c.hero})`}}):null, h('div',{class:'body'}, h('div',{}, h('span',{class:'badge'},c.category||'General'), ' ', c.level?h('span',{class:'badge'},c.level):null), h('h3',{style:{marginTop:'6px',fontSize:'18px'}}, c.title), h('p',{class:'small',style:{marginTop:'4px'}}, c.summary||''), h('div',{class:'progress',style:{marginTop:'8px'}}, h('div',{style:{width:pct+'%'}})) )); const link=h('a',{href:`course.html?course=${encodeURIComponent(c.id)}`,style:{display:'block'}}, card); grid.append(link); }); return grid; }
-    function boot(){ const app=document.getElementById('app'); app.innerHTML=''; app.append(topbar('Lumera Education Portal')); app.append(h('div',{class:'container'}, h('h2',{},'Course Catalog'), h('p',{class:'small'},'Click a course to open it. Only admins can update content.'), catalog())); document.body.append(h('footer',{}, h('div',{class:'container'},'© ', new Date().getFullYear(), ' Lumera'))); }
-    document.addEventListener('DOMContentLoaded', boot);
+
+    function catalog(courses){
+      const grid = h('div',{class:'grid-cards'});
+      courses.forEach(c=>{
+        const pct = progressPercent(getProgress(c.id), c);
+        const card = h('div',{class:'card'},
+          c.hero ? h('div',{class:'media',style:{backgroundImage:`url(${c.hero})`}}) : null,
+          h('div',{class:'body'},
+            h('div',{}, h('span',{class:'badge'},c.category||'General'), ' ', c.level ? h('span',{class:'badge'},c.level) : null),
+            h('h3',{style:{marginTop:'6px',fontSize:'18px'}}, c.title),
+            h('p',{class:'small',style:{marginTop:'4px'}}, c.summary||''),
+            h('div',{class:'progress',style:{marginTop:'8px'}}, h('div',{style:{width:pct+'%'}}))
+          )
+        );
+        const link = h('a',{ href:`course.html?course=${encodeURIComponent(c.id)}`, style:{display:'block'} }, card);
+        grid.append(link);
+      });
+      return grid;
+    }
+
+    async function boot(){
+      const app = document.getElementById('app'); app.innerHTML='';
+      app.append(topbar('Lumera Education Portal'));
+      const courses = await loadCourses();
+      app.append(
+        h('div',{class:'container'},
+          h('h2',{},'Course Catalog'),
+          h('p',{class:'small'},'Data comes from courses.json (or localStorage fallback).'),
+          catalog(courses)
+        )
+      );
+      document.body.append(h('footer',{}, h('div',{class:'container'},'© ', new Date().getFullYear(), ' Lumera')));
+    }
+    document.addEventListener('DOMContentLoaded', ()=>boot());
   </script>
 </body>
 </html>

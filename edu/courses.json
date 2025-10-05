@@ -1,0 +1,29 @@
+[
+  {
+    "id": "calculus-i",
+    "title": "Calculus I: Limits & Derivatives",
+    "category": "Mathematics",
+    "level": "Beginner",
+    "durationMinutes": 120,
+    "summary": "Start calculus from first principles: limits, derivative definition, and core rules with applications. Includes images and video embeds.",
+    "hero": "https://images.unsplash.com/photo-1529101091764-c3526daf38fe?q=80&w=1600&auto=format&fit=crop",
+    "modules": [
+      {
+        "id": "calculus-basics",
+        "title": "Calculus Basics: Limits & Derivatives",
+        "lessons": [
+          {
+            "id": "limits-intro",
+            "title": "What is a Limit? (with media)",
+            "contentHTML": "<h3>Idea</h3><p>The limit of f(x) as x approaches a means: what value does f(x) get close to?</p><div class=\\\"embed\\\"><iframe src=\\\"https://www.youtube.com/embed/3d6DsjIBzJ4\\\" title=\\\"Intro to Limits\\\" allowfullscreen></iframe></div><div class=\\\"caption\\\">Video: Intro to Limits</div><img src=\\\"https://images.unsplash.com/photo-1517976487492-576ea84ee09a?q=80&w=1600&auto=format&fit=crop\\\" alt=\\\"Graph\\\"/><div class=\\\"caption\\\">A conceptual graph illustration.</div><p>Try: lim_{{x\u21922}} (x^2-4)/(x-2)</p>"
+          },
+          {
+            "id": "derivative-definition",
+            "title": "Derivative as a Limit",
+            "contentHTML": "<pre>f\\'(x) = lim_{{h\u21920}} [f(x+h) - f(x)] / h</pre>"
+          }
+        ]
+      }
+    ]
+  }
+]
