@@ -1,0 +1,19 @@
+  {
+    "id": "getting-started",
+    "title": "Getting Started (Template)",
+    "category": "Onboarding",
+    "summary": "Edit me in Studio.",
+    "modules": [
+      {
+        "id": "module-1",
+        "title": "Module 1",
+        "lessons": [
+          {
+            "id": "lesson-1",
+            "title": "Lesson 1",
+            "contentHTML": "<p>...</p>"
+          }
+        ]
+      }
+    ]
+  },
