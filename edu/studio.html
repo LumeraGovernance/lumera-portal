@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lumera Studio</title>
+    <link rel="stylesheet" href="./css/styles.css" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <div class="container" id="content"></div>
+    <script type="module">
+      import { getAuth, promptLogin } from "./js/auth.js";
+      import { getCourses, setCourses } from "./js/courses.js";
+
+      function h(tag, attrs={}, ...children){
+        const el = document.createElement(tag);
+        Object.entries(attrs||{}).forEach(([k,v])=>{
+          if(k === "class") el.className = v;
+          else if(k.startsWith("on") && typeof v === "function") el.addEventListener(k.slice(2).toLowerCase(), v);
+          else el.setAttribute(k, v);
+        });
+        children.flat().forEach(c => el.append(c instanceof Node ? c : document.createTextNode(c)));
+        return el;
+      }
+
+      function renderTopbar(){
+        const auth = getAuth();
+        const nav = h("div", { class:"nav" },
+          h("span", { class:"small" }, `Role: ${auth.role}`),
+          auth.role === "viewer"
+            ? h("button", { class:"btn", onClick: ()=>{ promptLogin(); location.reload(); } }, "Sign in")
+            : h("button", { class:"btn", onClick: ()=>{ if(confirm('Sign out?')){ localStorage.setItem('lumera.auth', JSON.stringify({role:'viewer'})); location.reload(); } } }, "Sign out")
+        );
+        return h("div", { class:"topbar" },
+          h("div", { class:"inner" },
+            h("div", { class:"logo" }, "L"),
+            h("strong", {}, "Lumera Studio"),
+            h("div", { style:{flex:1} }),
+            h("a", { class:"btn", href:"index.html" }, "Catalog"),
+            h("a", { class:"btn", href:"studio.html" }, "Studio"),
+            h("a", { class:"btn", href:"admin.html" }, "Admin"),
+            nav
+          )
+        );
+      }
+
+      function guardAuthor(){
+        const role = getAuth().role;
+        const allowed = role === "author" || role === "admin";
+        if (!allowed){
+          const c = document.getElementById("content");
+          c.innerHTML = "";
+          c.append(
+            h("div", { class:"container" },
+              h("div", { class:"access" },
+                h("h3", {}, "Access denied"),
+                h("p", { class:"small" }, "You need author access. Use a user key to sign in."),
+                h("button", { class:"btn", onClick: ()=>{ promptLogin(); location.reload(); } }, "Sign in")
+              )
+            )
+          );
+        }
+        return allowed;
+      }
+
+      function renderStudio(){
+        const courses = getCourses();
+        const ctn = document.getElementById("content");
+        ctn.innerHTML = "";
+        const ta = h("textarea", { class:"mono", style:"width:100%;height:360px" }, JSON.stringify(courses, null, 2));
+        const save = h("button", { class:"btn primary", onClick: ()=>{
+          try{
+            const parsed = JSON.parse(ta.value);
+            if(!Array.isArray(parsed)) throw new Error("Expected an array of courses");
+            setCourses(parsed);
+            alert("Saved!");
+          }catch(e){ alert("Invalid JSON: " + e.message); }
+        } }, "Save JSON");
+        ctn.append(
+          h("div", { class:"container" },
+            h("h2", {}, "Studio (JSON Editor)"),
+            h("p", { class:"small" }, "Paste or edit your course JSON. We'll keep adding visual editors later."),
+            ta,
+            h("div", { style:"margin-top:8px" }, save)
+          )
+        );
+      }
+
+      function boot(){
+        document.getElementById("app").append(renderTopbar());
+        if (guardAuthor()) renderStudio();
+      }
+      document.addEventListener("DOMContentLoaded", boot);
+    </script>
+  </body>
+</html>

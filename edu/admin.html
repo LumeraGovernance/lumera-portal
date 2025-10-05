@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lumera Admin</title>
+    <link rel="stylesheet" href="./css/styles.css" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <div class="container" id="content"></div>
+    <script type="module">
+      import { getAuth, promptLogin } from "./js/auth.js";
+      import { getCourses } from "./js/courses.js";
+
+      function h(tag, attrs={}, ...children){
+        const el = document.createElement(tag);
+        Object.entries(attrs||{}).forEach(([k,v])=>{
+          if(k === "class") el.className = v;
+          else if(k.startsWith("on") && typeof v === "function") el.addEventListener(k.slice(2).toLowerCase(), v);
+          else el.setAttribute(k, v);
+        });
+        children.flat().forEach(c => el.append(c instanceof Node ? c : document.createTextNode(c)));
+        return el;
+      }
+
+      function renderTopbar(){
+        const auth = getAuth();
+        const nav = h("div", { class:"nav" },
+          h("span", { class:"small" }, `Role: ${auth.role}`),
+          auth.role === "viewer"
+            ? h("button", { class:"btn", onClick: ()=>{ promptLogin(); location.reload(); } }, "Sign in")
+            : h("button", { class:"btn", onClick: ()=>{ if(confirm('Sign out?')){ localStorage.setItem('lumera.auth', JSON.stringify({role:'viewer'})); location.reload(); } } }, "Sign out")
+        );
+        return h("div", { class:"topbar" },
+          h("div", { class:"inner" },
+            h("div", { class:"logo" }, "L"),
+            h("strong", {}, "Lumera Admin"),
+            h("div", { style:{flex:1} }),
+            h("a", { class:"btn", href:"index.html" }, "Catalog"),
+            h("a", { class:"btn", href:"studio.html" }, "Studio"),
+            h("a", { class:"btn", href:"admin.html" }, "Admin"),
+            nav
+          )
+        );
+      }
+
+      function guardAdmin(){
+        const auth = getAuth();
+        const allowed = auth.role === "admin";
+        if (!allowed){
+          const c = document.getElementById("content");
+          c.innerHTML = "";
+          c.append(
+            h("div", { class:"container" },
+              h("div", { class:"access" },
+                h("h3", {}, "Access denied"),
+                h("p", { class:"small" }, "You need admin access. Use a user key to sign in."),
+                h("button", { class:"btn", onClick: ()=>{ promptLogin(); location.reload(); } }, "Sign in")
+              )
+            )
+          );
+        }
+        return allowed;
+      }
+
+      function renderAdmin(){
+        const courses = getCourses();
+        const c = document.getElementById("content");
+        c.innerHTML = "";
+        c.append(
+          h("div", { class:"container" },
+            h("h2", {}, "Admin"),
+            h("p", { class:"small" }, "Read-only overview for now. We can wire analytics & user management later."),
+            h("pre", { class:"mono", style:"white-space:pre-wrap;background:#fafafa;border:1px solid #e6e7e8;padding:12px;border-radius:12px" }, JSON.stringify({courseCount:courses.length}, null, 2))
+          )
+        );
+      }
+
+      function boot(){
+        document.getElementById("app").append(renderTopbar());
+        if (guardAdmin()) renderAdmin();
+      }
+      document.addEventListener("DOMContentLoaded", boot);
+    </script>
+  </body>
+</html>
