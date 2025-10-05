@@ -1,5 +1,5 @@
 {
-  "updated": "2025-10-02",
+  "updated": "2025-10-06",
   "tribes": {
     "TUR": {
       "code": "TUR",
@@ -24,6 +24,11 @@
       "name": "Infrastructure Circle",
       "desc": "Operate digital infrastructure and plan Anolle projects.",
       "members": ["LUM0002"]
-    }
+    },
+    "AMP": {
+      "code": "AMP",
+      "name": "Ármpţorël Tribe",
+      "desc": ".",
+      "members": ["LUM0003"]
   }
 }
