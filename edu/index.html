@@ -79,25 +79,58 @@
     }
 
     // -------- UI --------
-    function topbar(){
-      const auth = getAuth();
-      return h("div",{class:"topbar"},
-        h("div",{class:"inner"},
-          h("div",{class:"logo"},"L"),
-          h("div",{}, h("strong",{},"Lumera Education Portal")),
-          h("div",{style:{flex:1}}),
-          h("a",{class:"btn",href:"index.html"},"Catalog"),
-          (auth.role==="author"||auth.role==="admin") ? h("a",{class:"btn",href:"studio.html"},"Studio") : null,
-          (auth.role==="admin") ? h("a",{class:"btn",href:"admin.html"},"Admin") : null,
-          h("div",{class:"nav"},
-            h("span",{class:"small"},"Role: "+auth.role),
-            auth.role==="viewer"
-              ? h("button",{class:"btn",onClick:()=>{promptLogin(); location.reload();}},"Sign in")
-              : h("button",{class:"btn",onClick:()=>{ if(confirm('Sign out?')){ setAuth({role:'viewer'}); location.reload(); } }},"Sign out")
-          )
+    function topbar() {
+  const auth = getAuth();
+  const roleLabel = auth && auth.role ? auth.role : "viewer";
+
+  const navButtons = [
+    h("span", { class: "small" }, "Role: " + roleLabel),
+    roleLabel === "viewer"
+      ? h(
+          "button",
+          {
+            class: "btn",
+            onClick: () => {
+              promptLogin();
+              location.reload();
+            },
+          },
+          "Sign in"
         )
-      );
-    }
+      : h(
+          "button",
+          {
+            class: "btn",
+            onClick: () => {
+              if (confirm("Sign out?")) {
+                setAuth({ role: "viewer" });
+                location.reload();
+              }
+            },
+          },
+          "Sign out"
+        ),
+  ];
+
+  return h(
+    "div",
+    { class: "topbar" },
+    h(
+      "div",
+      { class: "inner" },
+      h("div", { class: "logo" }, "L"),
+      h("strong", {}, "Lumera Education Portal"),
+      h("div", { style: { flex: 1 } }),
+      h("a", { class: "btn", href: "index.html" }, "Catalog"),
+      (roleLabel === "author" || roleLabel === "admin") &&
+        h("a", { class: "btn", href: "studio.html" }, "Studio"),
+      roleLabel === "admin" &&
+        h("a", { class: "btn", href: "admin.html" }, "Admin"),
+      h("div", { class: "nav" }, navButtons)
+    )
+  );
+}
+
 
     function catalog(){
       const grid = h("div",{class:"grid"});
