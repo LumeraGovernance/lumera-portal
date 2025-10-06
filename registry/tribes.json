@@ -30,6 +30,17 @@
       "name": "Ármpţorël Tribe",
       "desc": ".",
       "members": ["LUM0003"]
-    }
+    },
+    "SEC":{
+      "code": "SEC",
+      "name": "Defense & Security Circle",
+      "desc": "Security, safety, and defense.",
+      "members": ["LUM0003"]
+    },
+    "HOS": {
+      "code": "HOS",
+      "name": "Head of State",
+      "desc": "Tasked with upholding the constitution, ratifying treaties, and representing Lumera",
+      "members": ["LUM0001"]
   }
 }
