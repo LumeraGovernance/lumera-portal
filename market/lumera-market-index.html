@@ -1,0 +1,882 @@
+\
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Lumera Market — Standalone</title>
+  <meta name="description" content="Lumera Market demo: multi-currency pricing (LMC + fiat), checkout, chat fulfilment with OCK, Anolles buy/preorder — single-file build."/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  </style>
+</head>
+<body class="bg-white">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useMemo, useState, useEffect } = React;
+    const cx = (...arr) => arr.filter(Boolean).join(" ");
+
+    // ---------- Currency utils ----------
+    const DEFAULT_SYMBOL = { GBP: "£", USD: "$", EUR: "€", JPY: "¥", CAD: "C$", AUD: "A$" };
+    const DEFAULT_FX = { GBP: 1, USD: 1.25, EUR: 1.16, JPY: 182, CAD: 1.7, AUD: 1.9 };
+    const DEFAULT_GBP_PER_LMC = 1; // demo default
+
+    function formatPriceFromGBP(amountGBP, mode = "LMC", fx = DEFAULT_FX, gbpPerLmc = DEFAULT_GBP_PER_LMC, symbol = DEFAULT_SYMBOL) {
+      if (mode === "LMC") return `${(amountGBP / gbpPerLmc).toFixed(2)} LMC`;
+      const rate = fx[mode] || 1;
+      return `${symbol[mode] || ""}${(amountGBP * rate).toFixed(2)}`;
+    }
+    function approxGBP(amountGBP, mode) {
+      if (mode === "GBP") return null;
+      return `≈ £${amountGBP.toFixed(2)}`;
+    }
+
+    // ---------- Data ----------
+    const CATEGORIES = [
+      "Grains & Staples","Fresh Produce","Plant Proteins","Pantry","Household","Ready Meals",
+      "Beverages","Snacks","Frozen Foods","Health & Beauty","Cleaning Supplies","Baby & Kids",
+      "Pet Care","Home & Garden","Stationery","Apparel","Footwear","Sports & Outdoor",
+      "Books & Learning","Cultural Goods","Artisanal Crafts","Medicinal Herbs"
+    ];
+    const TAGS = ["vegan","organic","bulk","eco","local","gluten-free"];
+
+    // Anolle lots (Option B sizing)
+    const ANOLLE_LOTS = [
+      { id: "lot-r-1b", label: "Residential — 1 Bedroom", type: "residential", breakEvenGBP: 25000.00, size: "45.0 m² • 1-bed shell", phase: "Phase 1", img: "https://images.unsplash.com/photo-1505691723518-36a5ac3b2d52?q=80&w=1200&auto=format&fit=crop" },
+      { id: "lot-r-3b", label: "Residential — 3 Bedroom", type: "residential", breakEvenGBP: 41222.22, size: "74.2 m² • 3-bed shell", phase: "Phase 1", img: "https://images.unsplash.com/photo-1479839672679-a46483c0e7c8?q=80&w=1200&auto=format&fit=crop" },
+      { id: "lot-r-5b", label: "Residential — 5 Bedroom", type: "residential", breakEvenGBP: 57388.89, size: "103.3 m² • 5-bed shell", phase: "Phase 1", img: "https://images.unsplash.com/photo-1479839672679-a46483c0e7c8?q=80&w=1200&auto=format&fit=crop" },
+      { id: "lot-c-201", label: "Commercial — Market Stall", type: "commercial", breakEvenGBP: 12000, size: "12m² unit", phase: "Phase 1", img: "https://images.unsplash.com/photo-1498654200943-1088dd4438ae?q=80&w=1200&auto=format&fit=crop" },
+      { id: "lot-c-202", label: "Commercial — High Street", type: "commercial", breakEvenGBP: 55000, size: "45m² unit", phase: "Phase 2", img: "https://images.unsplash.com/photo-1529429612779-c8e40ef2f36f?q=80&w=1200&auto=format&fit=crop" },
+    ];
+    const LOT_MARKUP = { residential: 0.20, commercial: 0.40 };
+    const priceForLot = (be, type) => be * (1 + (LOT_MARKUP[type] || 0));
+
+    const mockProducts = [
+      { id: "r1", name: "Organic Brown Rice (5kg)", priceGBP: 11.9, category: "Grains & Staples", vendor: "Lumera Co-op", stock: 120, tags: ["vegan","organic","bulk"], img: "https://images.unsplash.com/photo-1457386319975-6a0fa9b1a662?q=80&w=800&auto=format&fit=crop" },
+      { id: "r2", name: "Chickpeas (2kg)", priceGBP: 6.5, category: "Plant Proteins", vendor: "Uruguay Agro", stock: 90, tags: ["vegan","bulk"], img: "https://images.unsplash.com/photo-1604908812923-8a3c2c4f2c39?q=80&w=800&auto=format&fit=crop" },
+      { id: "r3", name: "Oat Milk (1L)", priceGBP: 1.6, category: "Pantry", vendor: "Lumeran Dairy-Free", stock: 300, tags: ["vegan","eco"], img: "https://images.unsplash.com/photo-1526318472351-c75fcf070305?q=80&w=800&auto=format&fit=crop" },
+      { id: "r4", name: "Spinach (500g)", priceGBP: 1.2, category: "Fresh Produce", vendor: "Rio de la Plata Farms", stock: 200, tags: ["vegan","local","organic"], img: "https://images.unsplash.com/photo-1506806732259-39c2d0268443?q=80&w=800&auto=format&fit=crop" },
+      { id: "r5", name: "Tofu (400g)", priceGBP: 2.4, category: "Plant Proteins", vendor: "Montevideo Soy Collective", stock: 160, tags: ["vegan","local"], img: "https://images.unsplash.com/photo-1604503468506-a8da13d82791?q=80&w=800&auto=format&fit=crop" },
+      { id: "r6", name: "Laundry Powder (3kg)", priceGBP: 7.9, category: "Cleaning Supplies", vendor: "Lumera Household Works", stock: 55, tags: ["eco"], img: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=800&auto=format&fit=crop" },
+      { id: "r7", name: "Tomato Passata (700g)", priceGBP: 2.1, category: "Pantry", vendor: "Pampas Preserves", stock: 220, tags: ["vegan","local"], img: "https://images.unsplash.com/photo-1514511547112-6c8e1a1c9e3b?q=80&w=800&auto=format&fit=crop" },
+      { id: "r8", name: "Lentil Bolognese (2 servings)", priceGBP: 4.9, category: "Ready Meals", vendor: "Lumera Kitchens", stock: 80, tags: ["vegan"], img: "https://images.unsplash.com/photo-1526312426976-593c2b9999ae?q=80&w=800&auto=format&fit=crop" },
+      { id: "r9", name: "Bananas (1kg)", priceGBP: 1.5, category: "Fresh Produce", vendor: "Atlantic Fairtrade", stock: 260, tags: ["vegan","eco"], img: "https://images.unsplash.com/photo-1571772805064-207c8435df79?q=80&w=800&auto=format&fit=crop" },
+      { id: "r10", name: "Black Beans (2kg)", priceGBP: 7.2, category: "Plant Proteins", vendor: "Lumera Co-op", stock: 110, tags: ["vegan","bulk"], img: "https://images.unsplash.com/photo-1516685018646-549198525c1b?q=80&w=800&auto=format&fit=crop" },
+    ];
+
+    // ---------- Atoms ----------
+    const Badge = ({ children }) => (<span className="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium">{children}</span>);
+    const Pill = ({ active, onClick, children }) => (
+      <button onClick={onClick} className={cx("px-3 py-1 rounded-full text-sm border transition", active ? "bg-black text-white" : "hover:bg-black/5")}>{children}</button>
+    );
+    const IconButton = ({ title, onClick, children }) => (
+      <button title={title} onClick={onClick} className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 hover:bg-black/5">{children}</button>
+    );
+
+    // ---------- Header ----------
+    function Header({ view, setView, wallet, setWalletOpen, cartCount, currencyMode, setCurrencyMode, symbol, gbpPerLmc }) {
+      const items = [
+        { key: "market", label: "Market" },
+        { key: "subscriptions", label: "Weekly Box" },
+        { key: "orders", label: "Orders" },
+        { key: "anolles", label: "Anolles" },
+        { key: "vendors", label: "Vendors" },
+        { key: "admin", label: "Admin" },
+      ];
+      return (
+        <header className="sticky top-0 z-20 bg-white/90 backdrop-blur border-b">
+          <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-2xl bg-emerald-600 grid place-items-center text-white font-bold">LM</div>
+              <div>
+                <div className="text-lg font-semibold leading-none">Lumera Market</div>
+                <div className="text-xs text-neutral-500">Community • Ethical • Circular</div>
+              </div>
+            </div>
+            <nav className="hidden md:flex items-center gap-2">
+              {items.map((it) => (
+                <Pill key={it.key} active={view === it.key} onClick={() => setView(it.key)}>{it.label}</Pill>
+              ))}
+            </nav>
+            <div className="flex items-center gap-2">
+              <select aria-label="Currency" className="rounded-xl border px-2 py-2 text-sm" value={currencyMode} onChange={(e)=>setCurrencyMode(e.target.value)}>
+                <option value="LMC">LMC</option>
+                {Object.keys(symbol).map((k)=> <option key={k} value={k}>{k}</option>)}
+              </select>
+              <span className="hidden lg:inline text-xs text-neutral-500">{`1 LMC ≈ £${gbpPerLmc}`}</span>
+              <IconButton title="Wallet" onClick={() => setWalletOpen(true)}>
+                <span>💳</span>
+                <span className="hidden sm:inline text-sm">{wallet.connected ? `${wallet.address.slice(0, 6)}…${wallet.address.slice(-4)}` : "Connect Wallet"}</span>
+              </IconButton>
+              <IconButton title="Cart" onClick={wallet.openCart}>
+                <span>🛒</span>
+                <span className="text-sm">{cartCount}</span>
+              </IconButton>
+            </div>
+          </div>
+          <div className="md:hidden border-t overflow-x-auto no-scrollbar">
+            <div className="flex gap-2 px-4 py-2 items-center">
+              {items.map((it) => (
+                <Pill key={it.key} active={view === it.key} onClick={() => setView(it.key)}>{it.label}</Pill>
+              ))}
+              <select aria-label="Currency" className="rounded-xl border px-2 py-1 text-sm ml-auto" value={currencyMode} onChange={(e)=>setCurrencyMode(e.target.value)}>
+                <option value="LMC">LMC</option>
+                {Object.keys(symbol).map((k)=> <option key={k} value={k}>{k}</option>)}
+              </select>
+            </div>
+          </div>
+        </header>
+      );
+    }
+
+    // ---------- Wallet Modal ----------
+    function WalletModal({ open, onClose, wallet, setWallet }) {
+      if (!open) return null;
+      const connect = () => setWallet({ ...wallet, connected: true, address: "0xLUMERA1234ABCD" });
+      const disconnect = () => setWallet({ connected: false, address: "", balanceLMC: 250, balanceGBP: 50, openCart: wallet.openCart });
+      return (
+        <div className="fixed inset-0 z-30 bg-black/40 grid place-items-center p-4" onClick={onClose}>
+          <div className="w-full max-w-md rounded-2xl bg-white p-4 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Wallet</h3>
+              <button onClick={onClose} className="text-xl">×</button>
+            </div>
+            <div className="mt-3 space-y-2 text-sm">
+              <div className="flex items-center justify-between"><span>Lumera Coin (LMC)</span><strong>{wallet.balanceLMC.toFixed(2)} LMC</strong></div>
+              <div className="flex items-center justify-between"><span>GBP Balance</span><strong>£{wallet.balanceGBP.toFixed(2)}</strong></div>
+            </div>
+            <div className="mt-4 flex gap-2">
+              {!wallet.connected ? (
+                <button className="rounded-xl bg-black text-white px-4 py-2" onClick={connect}>Connect Lumera Wallet</button>
+              ) : (
+                <button className="rounded-xl border px-4 py-2" onClick={disconnect}>Disconnect</button>
+              )}
+              <button className="rounded-xl border px-4 py-2">Top Up</button>
+            </div>
+            <p className="mt-3 text-xs text-neutral-500">Payments auto-split: 60% vendor • 20% logistics • 10% ops • 10% treasury.</p>
+          </div>
+        </div>
+      );
+    }
+
+    // ---------- Filters ----------
+    function Filters({ q, setQ, cat, setCat, tags, setTags, sort, setSort }) {
+      return (
+        <div className="flex flex-col md:flex-row gap-2 md:items-center md:justify-between">
+          <div className="relative w-full md:w-80">
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search products, vendors…" className="w-full rounded-2xl border px-4 py-2 pr-9" />
+            <span className="absolute right-3 top-2.5">🔎</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <select value={cat} onChange={(e) => setCat(e.target.value)} className="rounded-xl border px-3 py-2">
+              <option value="">All Categories</option>
+              {CATEGORIES.map((c) => (<option key={c} value={c}>{c}</option>))}
+            </select>
+            <select value={sort} onChange={(e) => setSort(e.target.value)} className="rounded-xl border px-3 py-2">
+              <option value="pop">Popular</option>
+              <option value="priceAsc">Price ↑</option>
+              <option value="priceDesc">Price ↓</option>
+              <option value="stockDesc">Stock</option>
+            </select>
+            <div className="flex gap-2 overflow-x-auto no-scrollbar">
+              {TAGS.map((t) => {
+                const on = tags.includes(t);
+                return (<Pill key={t} active={on} onClick={() => setTags(on ? tags.filter(x=>x!==t) : [...tags, t])}>{t}</Pill>);
+              })}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ---------- Product Card ----------
+    function ProductCard({ p, add, currencyMode, fmt }) {
+      return (
+        <div className="group rounded-2xl border overflow-hidden hover:shadow-md transition flex flex-col">
+          <div className="aspect-video bg-neutral-100">
+            <img src={p.img} alt={p.name} className="h-full w-full object-cover" />
+          </div>
+          <div className="p-3 flex-1 flex flex-col">
+            <div className="text-sm text-neutral-500">{p.vendor}</div>
+            <div className="font-semibold leading-snug">{p.name}</div>
+            <div className="mt-1 text-sm flex items-center gap-2 flex-wrap">
+              <Badge>{p.category}</Badge>
+              {p.tags.slice(0,2).map((t) => <Badge key={t}>{t}</Badge>)}
+            </div>
+            <div className="mt-auto flex items-end justify-between pt-3">
+              <div>
+                <div className="text-lg font-semibold">{fmt(p.priceGBP)}</div>
+                {approxGBP(p.priceGBP, currencyMode) && (
+                  <div className="text-xs text-neutral-500">{approxGBP(p.priceGBP, currencyMode)}</div>
+                )}
+              </div>
+              <button onClick={() => add(p)} className="rounded-xl bg-emerald-600 text-white px-3 py-2 hover:bg-emerald-700">Add</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ---------- Cart Panel ----------
+    function CartPanel({ open, onClose, cart, setCart, checkout, currencyMode, fmt }) {
+      const totalGBP = cart.reduce((s, it) => s + it.priceGBP * it.qty, 0);
+      return (
+        <div className={cx("fixed inset-0 z-40", open ? "" : "pointer-events-none")}> 
+          <div className={cx("absolute inset-0 bg-black/40 transition", open ? "opacity-100" : "opacity-0")} onClick={onClose} />
+          <aside className={cx("absolute right-0 top-0 h_full w-full max-w-md bg-white border-l shadow-xl p-4 flex flex-col transition", open ? "translate-x-0" : "translate-x-full")}>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Your Cart</h3>
+              <button onClick={onClose} className="text-xl">×</button>
+            </div>
+            <div className="mt-3 space-y-3 flex-1 overflow-auto">
+              {cart.length === 0 && <div className="text-sm text-neutral-500">Cart is empty.</div>}
+              {cart.map((it) => (
+                <div key={it.id} className="flex gap-3 items-center">
+                  <img src={it.img} alt={it.name} className="h-16 w-16 rounded-xl object-cover" />
+                  <div className="flex-1">
+                    <div className="text-sm font-medium">{it.name}</div>
+                    <div className="text-xs text-neutral-500">{fmt(it.priceGBP)} • {it.vendor}</div>
+                    <div className="mt-1 flex items-center gap-2">
+                      <button className="rounded-lg border px-2" onClick={() => setCart((c)=>c.map(x=>x.id===it.id?{...x, qty: Math.max(1, x.qty-1)}:x))}>-</button>
+                      <span className="text-sm w-6 text-center">{it.qty}</span>
+                      <button className="rounded-lg border px-2" onClick={() => setCart((c)=>c.map(x=>x.id===it.id?{...x, qty: x.qty+1}:x))}>+</button>
+                      <button className="ml-2 text-xs text-red-600" onClick={() => setCart((c)=>c.filter(x=>x.id!==it.id))}>Remove</button>
+                    </div>
+                  </div>
+                  <div className="text-sm font-semibold">{fmt(it.priceGBP*it.qty)}</div>
+                </div>
+              ))}
+            </div>
+            <div className="border-t pt-3">
+              <div className="flex items-center justify_between text-sm"><span>Subtotal</span><strong>{fmt(totalGBP)}</strong></div>
+              <button disabled={cart.length===0} onClick={checkout} className="mt-3 w-full rounded-xl bg-black text-white py-2 disabled:opacity-40">Proceed to Checkout</button>
+            </div>
+          </aside>
+        </div>
+      );
+    }
+
+    // ---------- Checkout Modal ----------
+    function CheckoutModal({ open, onClose, totalGBP, wallet, setWallet, currencyMode, fmt, gbpPerLmc }) {
+      const [method, setMethod] = useState("LMC");
+      const [deliverTo, setDeliverTo] = useState("anolle");
+      const [block, setBlock] = useState("A-3");
+      const [unit, setUnit] = useState("1204");
+      const [address, setAddress] = useState("");
+      const [contactEmail, setContactEmail] = useState("");
+
+      if (!open) return null;
+      const totalLMC = gbpPerLmc ? totalGBP / gbpPerLmc : totalGBP;
+      const canPay = method === "LMC" ? wallet.balanceLMC >= totalLMC : wallet.balanceGBP >= totalGBP;
+      const pay = () => {
+        if (!canPay) return;
+        if (method === "LMC") setWallet({ ...wallet, balanceLMC: wallet.balanceLMC - totalLMC });
+        else setWallet({ ...wallet, balanceGBP: wallet.balanceGBP - totalGBP });
+        onClose({ paid: true, method, deliverTo, block, unit, address, contactEmail, totalGBP, totalLMC });
+      };
+
+      return (
+        <div className="fixed inset-0 z-50 bg-black/40 grid place-items-center p-4" onClick={()=>onClose({ paid:false })}>
+          <div className="w-full max-w-lg rounded-2xl bg-white p-4 shadow-xl" onClick={(e)=>e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Checkout</h3>
+              <button onClick={()=>onClose({ paid:false })} className="text-xl">×</button>
+            </div>
+            <div className="mt-3 space-y-3">
+              <div className="flex items-center justify-between text-sm"><span>Total</span><strong>{fmt(totalGBP)}{currencyMode!=="GBP" ? ` (${approxGBP(totalGBP, currencyMode)})` : ""}</strong></div>
+              <div className="space-y-1">
+                <div className="text-sm font-medium">Contact</div>
+                <input className="w-full rounded-xl border px-3 py-2" value={contactEmail} onChange={(e)=>setContactEmail(e.target.value)} placeholder="Email for receipts & chat verification (optional)" />
+              </div>
+              <div className="space-y-1">
+                <div className="text-sm font-medium">Payment Method</div>
+                <div className="flex gap-2">
+                  <Pill active={method==="LMC"} onClick={()=>setMethod("LMC")}>Lumera Coin</Pill>
+                  <Pill active={method==="GBP"} onClick={()=>setMethod("GBP")}>GBP</Pill>
+                </div>
+                {!canPay && <div className="text-xs text-red-600">Insufficient balance. Top up or switch method.</div>}
+              </div>
+              <div className="space-y-1">
+                <div className="text-sm font-medium">Delivery</div>
+                <div className="flex gap-2">
+                  <Pill active={deliverTo==="anolle"} onClick={()=>setDeliverTo("anolle")}>Anolle Drop-Off</Pill>
+                  <Pill active={deliverTo==="home"} onClick={()=>setDeliverTo("home")}>Home Delivery</Pill>
+                </div>
+                {deliverTo === "anolle" ? (
+                  <div className="mt-2 grid grid-cols-2 gap-2">
+                    <input className="rounded-xl border px-3 py-2" value={block} onChange={(e)=>setBlock(e.target.value)} placeholder="Block (e.g., A-3)" />
+                    <input className="rounded-xl border px-3 py-2" value={unit} onChange={(e)=>setUnit(e.target.value)} placeholder="Unit (e.g., 1204)" />
+                  </div>
+                ) : (
+                  <input className="mt-2 w-full rounded-xl border px-3 py-2" value={address} onChange={(e)=>setAddress(e.target.value)} placeholder="Full address" />
+                )}
+              </div>
+              <button disabled={!canPay} onClick={pay} className="w-full rounded-xl bg-emerald-600 text-white py-2 disabled:opacity-40">Pay Now</button>
+              <p className="text-xs text-neutral-500">By paying, you agree to fair pricing and revenue split (vendor/logistics/ops/treasury).</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ---------- Order Success ----------
+    function OrderSuccessModal({ open, onClose, order, openChat }) {
+      if (!open || !order) return null;
+      return (
+        <div className="fixed inset-0 z-50 bg-black/40 grid place-items-center p-4" onClick={onClose}>
+          <div className="w-full max-w-lg rounded-2xl bg-white p-4 shadow-xl" onClick={(e)=>e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Order placed! 🎉</h3>
+              <button onClick={onClose} className="text-xl">×</button>
+            </div>
+            <div className="mt-3 space-y-3 text-sm">
+              <div>Order Chat Key (OCK): <strong>{order.ock}</strong></div>
+              <div className="flex gap-2">
+                <button className="rounded-xl border px-3 py-2" onClick={()=>navigator.clipboard?.writeText(order.ock)}>Copy OCK</button>
+                <button className="rounded-xl bg-emerald-600 text-white px-3 py-2" onClick={()=>{ openChat(order.ock); onClose(); }}>Open Chat with OCK</button>
+              </div>
+              <div className="text-neutral-600">Status: <strong>Awaiting Confirmation</strong>. An agent will confirm your order in chat before allocation.</div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ---------- Chat ----------
+    function ChatFab({ onOpen }) { return (
+      <button onClick={onOpen} className="fixed bottom-4 right-4 z-40 rounded-full shadow-lg bg-emerald-600 text-white h-14 w-14 grid place-items-center text-2xl">💬</button>
+    ); }
+
+    function ChatDrawer({ open, onClose, prefillOCK, onAgentConfirm, getOrderByOCK, onProgress }) {
+      const [ock, setOck] = useState(prefillOCK || "");
+      const [verified, setVerified] = useState(false);
+      const [otpSent, setOtpSent] = useState(false);
+      const [otp, setOtp] = useState("");
+      const [messages, setMessages] = useState([{ from: "system", body: "Welcome to Lumera Support. Share your OCK to begin." }]);
+
+      useEffect(()=>{ if (prefillOCK) setOck(prefillOCK); }, [prefillOCK]);
+
+      const send = (body) => {
+        if (!body.trim()) return;
+        setMessages((m)=>[...m, { from: "you", body }]);
+        if (!verified) {
+          setMessages((m)=>[...m, { from: "you", body }, { from: "agent", body: "Thanks! We’ll verify your OCK. Tap 'Send OTP' and enter the code 123456 to simulate verification." }]);
+        }
+      };
+      const sendOtp = () => { setOtpSent(true); };
+      const verifyOtp = () => { if (otp === "123456") setVerified(true); };
+
+      return (
+        <div className={cx("fixed inset-0 z-50", open ? "" : "pointer-events-none")}> 
+          <div className={cx("absolute inset-0 bg-black/40 transition", open ? "opacity-100" : "opacity-0")} onClick={onClose} />
+          <aside className={cx("absolute right-0 top-0 h-full w-full max-w-md bg-white border-l shadow-xl p-4 flex flex-col transition", open ? "translate-x-0" : "translate-x-full") }>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Support Chat</h3>
+              <button onClick={onClose} className="text-xl">×</button>
+            </div>
+            <div className="mt-3 space-y-2">
+              <label className="text-xs text-neutral-500">Order Chat Key (OCK)</label>
+              <input className="rounded-xl border px-3 py-2 w-full" value={ock} onChange={(e)=>setOck(e.target.value)} placeholder="LM-YYYYMMDD-XXXX-XXXX" />
+            </div>
+            {!verified && (
+              <div className="mt-2 rounded-xl border p-3 text-sm">
+                <div className="font-medium">Verify to modify orders</div>
+                <div className="text-xs text-neutral-500">For the demo, click Send OTP then enter <code>123456</code>.</div>
+                <div className="mt-2 flex gap-2">
+                  <button className="rounded-xl border px-3 py-2" onClick={sendOtp} disabled={otpSent}>{otpSent?"OTP Sent":"Send OTP"}</button>
+                  <input className="rounded-xl border px-3 py-2 flex-1" value={otp} onChange={(e)=>setOtp(e.target.value)} placeholder="Enter OTP" />
+                  <button className="rounded-xl bg-emerald-600 text-white px-3 py-2" onClick={verifyOtp} disabled={!otpSent}>Verify</button>
+                </div>
+              </div>
+            )}
+            {verified && (
+              <div className="mt-2 rounded-xl border p-3 text-sm bg-emerald-50">
+                <div className="font-medium">Order Controls</div>
+                <div className="text-xs text-neutral-700">
+                  Current status: <strong>{getOrderByOCK?.(ock)?.status || 'Unknown'}</strong>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <button className="rounded-xl bg-emerald-600 text-white px-3 py-2" onClick={()=> { onAgentConfirm?.(ock); }}>Confirm (Allocated)</button>
+                  {getOrderByOCK?.(ock)?.status === 'Allocated' && (
+                    <button className="rounded-xl border px-3 py-2" onClick={()=> onProgress?.(ock, 'Preparing')}>Mark Preparing</button>
+                  )}
+                  {getOrderByOCK?.(ock)?.status === 'Preparing' && (
+                    <button className="rounded-xl border px-3 py-2" onClick={()=> onProgress?.(ock, 'Delivered')}>Mark Delivered</button>
+                  )}
+                </div>
+              </div>
+            )}
+            <div className="mt-3 flex-1 overflow-auto rounded-xl border p-3 space-y-2 bg-neutral-50">
+              {messages.map((m,i)=> (
+                <div key={i} className={cx("text-sm", m.from==="you"?"text-right":"text-left")}>
+                  <span className={cx("inline-block px-3 py-2 rounded-2xl", m.from==="you"?"bg-emerald-600 text-white":"bg-white border")}>{m.body}</span>
+                </div>
+              ))}
+            </div>
+            <ChatInput onSend={send} />
+          </aside>
+        </div>
+      );
+    }
+
+    function ChatInput({ onSend }) {
+      const [val, setVal] = useState("");
+      return (
+        <div className="mt-3 flex gap-2">
+          <input className="flex-1 rounded-xl border px-3 py-2" value={val} onChange={(e)=>setVal(e.target.value)} placeholder="Type a message" />
+          <button className="rounded-xl bg-black text-white px-4 py-2" onClick={()=>{ onSend(val); setVal(""); }}>Send</button>
+        </div>
+      );
+    }
+
+    // ---------- Subscriptions ----------
+    function Subscriptions({ products, addToCart, presets, setPresets, currencyMode, fmt }) {
+      const [selected, setSelected] = useState({});
+      const totalGBP = useMemo(()=>Object.entries(selected).reduce((s,[id,qty])=>{
+        const p = products.find(x=>x.id===id); return s + (p?.priceGBP||0)*qty; },0), [selected, products]);
+
+      const toggle = (id, delta) => setSelected((m)=>{ const q=(m[id]||0)+delta; const copy={...m}; if(q<=0) delete copy[id]; else copy[id]=q; return copy; });
+      const savePreset = () => { const name = `Weekly Box #${presets.length+1}`; setPresets([...presets, { name, items: selected }]); setSelected({}); };
+
+      return (
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="md:col-span-2">
+            <h3 className="text-lg font-semibold">Build your Weekly Box</h3>
+            <p className="text-sm text-neutral-600">Choose staples and produce; save as a subscription.</p>
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {products.map((p)=> (
+                <div key={p.id} className="rounded-2xl border p-3">
+                  <div className="font-medium text-sm line-clamp-2">{p.name}</div>
+                  <div className="text-xs text-neutral-500">{fmt(p.priceGBP)}</div>
+                  <div className="mt-2 flex items-center gap-2">
+                    <button className="rounded-lg border px-2" onClick={()=>toggle(p.id,-1)}>-</button>
+                    <span className="text-sm w-6 text-center">{selected[p.id]||0}</span>
+                    <button className="rounded-lg border px-2" onClick={()=>toggle(p.id,1)}>+</button>
+                    <button className="ml-auto text-xs" onClick={()=>addToCart(p)}>Add</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="md:col-span-1">
+            <div className="rounded-2xl border p-3 sticky top-24">
+              <div className="flex items_center justify-between"><h4 className="font-semibold">Box Summary</h4><span className="text-sm">{fmt(totalGBP)}</span></div>
+              <button disabled={totalGBP===0} onClick={savePreset} className="mt-3 w-full rounded-xl bg-black text-white py-2 disabled:opacity-40">Save as Subscription</button>
+              <div className="mt-3 space-y-2">
+                <div className="text-xs text-neutral-500">Saved Presets</div>
+                {presets.length===0 && <div className="text-sm">No presets yet.</div>}
+                {presets.map((pr, i)=> (
+                  <div key={i} className="rounded-xl border p-2">
+                    <div className="text-sm font-medium">{pr.name}</div>
+                    <div className="mt-1 flex gap-2">
+                      <button className="text-xs rounded-lg border px-2" onClick={()=>{ Object.entries(pr.items).forEach(([id,qty])=>{ const p = products.find(x=>x.id===id); if (!p) return; for (let k=0;k<qty;k++) addToCart(p); }); }}>Add to Cart</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ---------- Vendors ----------
+    function Vendors({ products }) {
+      const byVendor = products.reduce((m,p)=>{ (m[p.vendor]=m[p.vendor]||[]).push(p); return m; },{});
+      const [open, setOpen] = useState(false);
+      return (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Certified Vendors</h3>
+            <button className="rounded-xl border px-3 py-2" onClick={()=>setOpen(true)}>Apply as Vendor</button>
+          </div>
+          <div className="grid gap-3 md:grid-cols-2">
+            {Object.entries(byVendor).map(([v, items]) => (
+              <div key={v} className="rounded-2xl border p-3">
+                <div className="font-semibold">{v}</div>
+                <div className="text-xs text-neutral-500 mt-1">{items.length} products • Ethical • Transparent</div>
+              </div>
+            ))}
+          </div>
+          {open && <VendorApply onClose={()=>setOpen(false)} />}
+        </div>
+      );
+    }
+
+    function VendorApply({ onClose }) {
+      return (
+        <div className="fixed inset-0 z-40 bg-black/40 grid place-items-center p-4" onClick={onClose}>
+          <div className="w-full max-w-lg rounded-2xl bg-white p-4 shadow-xl" onClick={(e)=>e.stopPropagation()}>
+            <div className="flex items-center justify-between"><h3 className="text-lg font-semibold">Vendor Application</h3><button onClick={onClose} className="text-xl">×</button></div>
+            <div className="mt-3 grid gap-2">
+              <input className="rounded-xl border px-3 py-2" placeholder="Vendor / Co-op Name" />
+              <input className="rounded-xl border px-3 py-2" placeholder="Contact Email" />
+              <textarea className="rounded-xl border px-3 py-2" placeholder="Describe your ethical sourcing and products" rows={5} />
+              <button className="rounded-xl bg-emerald-600 text-white py-2">Submit</button>
+            </div>
+            <p className="mt-2 text-xs text-neutral-500">On approval, you'll receive access to the Vendor Portal to upload products and set inventory levels.</p>
+          </div>
+        </div>
+      );
+    }
+
+    // ---------- Orders ----------
+    function Orders({ orders, fmt, onProgressById }) {
+      if (!orders) return null;
+      return (
+        <div className="space-y-3">
+          <h3 className="text-lg font-semibold">Your Orders</h3>
+          <div className="grid gap-3">
+            {orders.map((o)=> (
+              <div key={o.id} className="rounded-2xl border p-3 flex items-center justify-between">
+                <div>
+                  <div className="font-medium">{o.id}{o.ock? ` • ${o.ock}`: ""}</div>
+                  <div className="text-xs text-neutral-500">{o.date} • {o.delivery}</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="text-sm font-semibold">{fmt(o.total)} • {o.status}</div>
+                  {o.status === "Allocated" && (
+                    <button className="text-xs rounded-lg border px-2" onClick={()=>onProgressById?.(o.id, "Preparing")}>Mark Preparing</button>
+                  )}
+                  {o.status === "Preparing" && (
+                    <button className="text-xs rounded-lg border px-2" onClick={()=>onProgressById?.(o.id, "Delivered")}>Mark Delivered</button>
+                  )}
+                </div>
+              </div>
+            ))}
+            {orders.length===0 && <div className="text-sm text-neutral-500">No orders yet.</div>}
+          </div>
+          <div className="text-xs text-neutral-500">Orders placed remain <strong>Awaiting Confirmation</strong> until an agent confirms in chat. After that, move through <em>Allocated → Preparing → Delivered</em>.</div>
+        </div>
+      );
+    }
+
+    // ---------- Admin ----------
+    function Admin({ products, currencyMode, fmt, symbol, setSymbol, fx, setFx, gbpPerLmc, setGbpPerLmc }) {
+      const totalSKUs = products.length;
+      const totalStock = products.reduce((s,p)=>s+p.stock,0);
+      const inventoryValue = products.reduce((s,p)=> s + p.priceGBP * p.stock, 0);
+
+      const [localFx, setLocalFx] = useState(fx);
+      const [localLmc, setLocalLmc] = useState(gbpPerLmc);
+      const [localSymbol, setLocalSymbol] = useState(symbol);
+
+      const saveRates = () => {
+        setFx(localFx);
+        setGbpPerLmc(Number(localLmc) || gbpPerLmc);
+        setSymbol(localSymbol);
+        try {
+          localStorage.setItem('lumera_fx', JSON.stringify(localFx));
+          localStorage.setItem('lumera_gbp_per_lmc', String(Number(localLmc) || gbpPerLmc));
+          localStorage.setItem('lumera_symbol', JSON.stringify(localSymbol));
+        } catch {}
+        alert("Rates saved. These persist in your browser for this demo.");
+      };
+
+      return (
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="rounded-2xl border p-4"><div className="text-xs text-neutral-500">SKUs</div><div className="text-2xl font-bold">{totalSKUs}</div></div>
+          <div className="rounded-2xl border p-4"><div className="text-xs text-neutral-500">Total Stock Units</div><div className="text-2xl font-bold">{totalStock}</div></div>
+          <div className="rounded-2xl border p-4"><div className="text-xs text-neutral-500">Inventory Value (retail)</div><div className="text-2xl font-bold">{fmt(inventoryValue)}</div></div>
+
+          <div className="md:col-span-3 rounded-2xl border p-4">
+            <div className="font-semibold">Pricing & FX Settings (Demo)</div>
+            <div className="mt-3 grid sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
+              {Object.keys(localSymbol).map((k)=> (
+                <div key={k} className="rounded-xl border p-3">
+                  <div className="font-medium mb-1">{k}</div>
+                  <label className="block text-xs text-neutral-500">Symbol</label>
+                  <input className="w-full rounded-xl border px-3 py-2 mb-2" value={localSymbol[k]} onChange={(e)=>setLocalSymbol({...localSymbol, [k]: e.target.value})} />
+                  <label className="block text-xs text-neutral-500">GBP → {k} rate</label>
+                  <input type="number" step="0.0001" className="w-full rounded-xl border px-3 py-2" value={localFx[k]} onChange={(e)=>setLocalFx({...localFx, [k]: Number(e.target.value)})} />
+                </div>
+              ))}
+              <div className="rounded-xl border p-3">
+                <div className="font-medium mb-1">LMC Oracle</div>
+                <label className="block text-xs text-neutral-500">GBP per 1 LMC</label>
+                <input type="number" step="0.0001" className="w-full rounded-xl border px-3 py-2" value={localLmc} onChange={(e)=>setLocalLmc(e.target.value)} />
+              </div>
+            </div>
+            <div className="rounded-xl border p-3 mt-3 flex items-center gap-2">
+              <button className="rounded-xl bg-black text-white px-4 py-2" onClick={saveRates}>Save display rates</button>
+              <button className="rounded-xl border px-4 py-2" onClick={()=>{ setLocalFx(DEFAULT_FX); setLocalLmc(DEFAULT_GBP_PER_LMC); setLocalSymbol(DEFAULT_SYMBOL); }}>Reset to defaults</button>
+            </div>
+          </div>
+
+          <div className="md:col-span-3 rounded-2xl border p-4">
+            <div className="font-semibold">Rules</div>
+            <ul className="list-disc pl-5 text-sm mt-2 space-y-1">
+              <li>Fair pricing & transparent splits (60/20/10/10).</li>
+              <li>Auto-batching by Anolle block to minimize delivery cost and emissions.</li>
+              <li>All vendors must pass ethical sourcing validation.</li>
+            </ul>
+          </div>
+        </div>
+      );
+    }
+
+    // ---------- Market View ----------
+    function Market({ products, add, currencyMode, fmt }) {
+      const [q, setQ] = useState("");
+      const [cat, setCat] = useState("");
+      const [tags, setTags] = useState([]);
+      const [sort, setSort] = useState("pop");
+
+      const list = useMemo(()=>{
+        let L = products.filter((p)=> (!q || (p.name+" "+p.vendor).toLowerCase().includes(q.toLowerCase())) && (!cat || p.category===cat) && (tags.length===0 || tags.every(t=>p.tags.includes(t))) );
+        if (sort==="priceAsc") L.sort((a,b)=>a.priceGBP-b.priceGBP);
+        if (sort==="priceDesc") L.sort((a,b)=>b.priceGBP-a.priceGBP);
+        if (sort==="stockDesc") L.sort((a,b)=>b.stock-a.stock);
+        return L;
+      }, [q, cat, tags, sort, products]);
+
+      return (
+        <div className="space-y-3">
+          <Filters q={q} setQ={setQ} cat={cat} setCat={setCat} tags={tags} setTags={setTags} sort={sort} setSort={setSort} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            {list.map((p)=> <ProductCard key={p.id} p={p} add={add} currencyMode={currencyMode} fmt={fmt} />)}
+            {list.length===0 && <div className="text-sm text-neutral-500">No products match your filters.</div>}
+          </div>
+        </div>
+      );
+    }
+
+    // ---------- Anolles ----------
+    function Anolles({ lots, addLot, currencyMode, fmt }) {
+      return (
+        <div className="space-y-3">
+          <div className="flex items-end justify-between">
+            <h3 className="text-lg font-semibold">Buy & Preorder Anolles</h3>
+            <div className="text-sm text-neutral-500">Residential: break-even + 20% • Commercial: break-even + 40%</div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {lots.map((lot)=>{
+              const retailGBP = priceForLot(lot.breakEvenGBP, lot.type);
+              return (
+                <div key={lot.id} className="rounded-2xl border overflow-hidden flex flex-col">
+                  <div className="aspect-video bg-neutral-100">
+                    <img src={lot.img} alt={lot.label} className="h-full w-full object-cover" />
+                  </div>
+                  <div className="p-3 flex-1 flex flex-col gap-1">
+                    <div className="text-xs text-neutral-500">{lot.phase} • {lot.size}</div>
+                    <div className="font-semibold leading-snug">{lot.label}</div>
+                    <div className="text-xs text-neutral-600">Break-even: {fmt(lot.breakEvenGBP)}{currencyMode!=="GBP"?` (${approxGBP(lot.breakEvenGBP, currencyMode)})`:''}</div>
+                    <div className="text-sm">Markup: {Math.round((LOT_MARKUP[lot.type]||0)*100)}%</div>
+                    <div className="mt-1 text-lg font-semibold">{fmt(retailGBP)}</div>
+                    {approxGBP(retailGBP, currencyMode) && (
+                      <div className="text-xs text-neutral-500">{approxGBP(retailGBP, currencyMode)}</div>
+                    )}
+                    <div className="mt-auto pt-2 flex gap-2">
+                      <button className="rounded-xl bg-emerald-600 text-white px-3 py-2" onClick={()=>addLot(lot, false)}>Buy</button>
+                      <button className="rounded-xl border px-3 py-2" onClick={()=>addLot(lot, true)}>Preorder</button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    // ---------- Root ----------
+    function App() {
+      const [view, setView] = useState("market");
+      const [cartOpen, setCartOpen] = useState(false);
+      const [cart, setCart] = useState([]);
+      const [walletOpen, setWalletOpen] = useState(false);
+      const [checkoutOpen, setCheckoutOpen] = useState(false);
+      const [presets, setPresets] = useState([]);
+
+      const [currencyMode, setCurrencyMode] = useState("LMC"); // default to LMC view
+      const [symbol, setSymbol] = useState(DEFAULT_SYMBOL);
+      const [fx, setFx] = useState(DEFAULT_FX);
+      const [gbpPerLmc, setGbpPerLmc] = useState(DEFAULT_GBP_PER_LMC);
+
+      // Load saved FX + LMC + symbols
+      useEffect(() => {
+        try {
+          const savedFx = localStorage.getItem('lumera_fx');
+          const savedLmc = localStorage.getItem('lumera_gbp_per_lmc');
+          const savedSym = localStorage.getItem('lumera_symbol');
+          if (savedFx) setFx(JSON.parse(savedFx));
+          if (savedLmc) setGbpPerLmc(Number(savedLmc));
+          if (savedSym) setSymbol(JSON.parse(savedSym));
+        } catch {}
+      }, []);
+
+      const fmt = (gbp) => formatPriceFromGBP(gbp, currencyMode, fx, gbpPerLmc, symbol);
+
+      const addToCart = (p) => setCart((c)=>{
+        const has = c.find((x)=>x.id===p.id);
+        if (has) return c.map((x)=>x.id===p.id?{...x, qty:x.qty+1}:x);
+        return [...c, {...p, qty:1}];
+      });
+
+      const addLotToCart = (lot, preorder) => setCart((c)=>{
+        const id = `${lot.id}${preorder?'-pre':''}`;
+        const retailGBP = priceForLot(lot.breakEvenGBP, lot.type);
+        const item = { id, name: `${lot.label}${preorder?' (Preorder)':''}`, priceGBP: retailGBP, category: 'Anolles', vendor: 'Anolle Development', stock: 1, tags: [lot.type, 'anolle'], img: lot.img, qty: 1 };
+        const has = c.find((x)=>x.id===id);
+        if (has) return c.map((x)=>x.id===id?{...x, qty:x.qty+1}:x);
+        return [...c, item];
+      });
+
+      const [wallet, setWallet] = useState({
+        connected: false,
+        address: "",
+        balanceLMC: 250,
+        balanceGBP: 50,
+        openCart: () => setCartOpen(true),
+      });
+
+      const totalGBP = cart.reduce((s,it)=>s+it.priceGBP*it.qty,0);
+
+      const goCheckout = () => { setCartOpen(false); setCheckoutOpen(true); };
+
+      // Orders
+      const [orders, setOrders] = useState([
+        { id: "ORD-1029", date: "2025-10-02", status: "Preparing", total: 32.6, delivery: "Anolle A-3 / Unit 1204", ock: null },
+        { id: "ORD-1017", date: "2025-09-28", status: "Delivered", total: 18.4, delivery: "Home Delivery", ock: null },
+      ]);
+
+      // Chat + order success
+      const [chatOpen, setChatOpen] = useState(false);
+      const [chatPrefillOCK, setChatPrefillOCK] = useState("");
+      const [orderSuccessOpen, setOrderSuccessOpen] = useState(false);
+      const [lastOrder, setLastOrder] = useState(null);
+
+      const genOCK = () => {
+        const d = new Date();
+        const ymd = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+        const rand = () => Math.random().toString(36).slice(2,6).toUpperCase();
+        return `LM-${ymd}-${rand()}-${rand()}`;
+      };
+
+      const handleCheckoutClose = (result) => {
+        setCheckoutOpen(false);
+        if (result && result.paid) {
+          const ock = genOCK();
+          const order = { id: `ORD-${Math.floor(Math.random()*9000)+1000}`, ock, date: new Date().toISOString().slice(0,10), status: "Awaiting Confirmation", total: result.totalGBP, delivery: result.deliverTo === "anolle" ? `Anolle ${result.block} / Unit ${result.unit}` : "Home Delivery" };
+          setOrders((prev)=>[order, ...prev]);
+          setLastOrder({ ock, contactEmail: result.contactEmail, deliverTo: result.deliverTo, block: result.block, unit: result.unit, address: result.address, method: result.method, totalGBP: result.totalGBP, totalLMC: result.totalLMC });
+          setOrderSuccessOpen(true);
+          setChatPrefillOCK(ock);
+          setCart([]);
+        }
+      };
+
+      const confirmOrderByOCK = (ock) => {
+        setOrders((prev)=> prev.map(o => o.ock === ock ? { ...o, status: "Allocated" } : o));
+      };
+      const progressOrderByOCK = (ock, next) => {
+        setOrders((prev)=> prev.map(o => o.ock === ock ? { ...o, status: next } : o));
+      };
+      const progressOrderById = (id, next) => {
+        setOrders((prev)=> prev.map(o => o.id === id ? { ...o, status: next } : o));
+      };
+
+      return (
+        <div className="min-h-screen bg-gradient-to-b from-white to-emerald-50">
+          <Header view={view} setView={setView} wallet={wallet} setWalletOpen={setWalletOpen} cartCount={cart.reduce((s,x)=>s+x.qty,0)} currencyMode={currencyMode} setCurrencyMode={setCurrencyMode} symbol={symbol} gbpPerLmc={gbpPerLmc} />
+
+          <main className="mx-auto max-w-7xl px-4 py-6 space-y-6">
+            {/* Hero */}
+            <section className="rounded-3xl bg-emerald-600 text-white p-6 md:p-8 flex flex-col md:flex-row items-center gap-6">
+              <div className="flex-1">
+                <h1 className="text-2xl md:text-3xl font-bold">Feed the City, Fund the Future</h1>
+                <p className="mt-2 text-white/90">Fair, vegan-first groceries sourced from Lumeran producers and ethical partners. Pay in Lumera Coin or GBP. Deliver to your Anolle block or door.</p>
+                <div className="mt-4 flex gap-2">
+                  <a href="#catalog" className="rounded-xl bg-white text-emerald-700 px-4 py-2 font-medium">Shop Now</a>
+                  <button onClick={()=>setView("subscriptions")} className="rounded-xl border border-white/40 px-4 py-2">Build Weekly Box</button>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 w_full md:w-1/2">
+                {mockProducts.slice(0,4).map((p)=> (
+                  <div key={p.id} className="rounded-2xl bg-white/10 p-3">
+                    <div className="text-sm font-semibold line-clamp-2">{p.name}</div>
+                    <div className="text-xs">{fmt(p.priceGBP)}</div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* View Switcher */}
+            {view === "market" && (
+              <section id="catalog" className="space-y-3">
+                <div className="flex items-end justify-between"><h2 className="text-xl font-semibold">Catalog</h2><div className="text-sm text-neutral-500">{mockProducts.length} items</div></div>
+                <Market products={mockProducts} add={addToCart} currencyMode={currencyMode} fmt={fmt} />
+              </section>
+            )}
+
+            {view === "subscriptions" && (
+              <section className="space-y-3">
+                <h2 className="text-xl font-semibold">Weekly Box</h2>
+                <Subscriptions products={mockProducts} addToCart={addToCart} presets={presets} setPresets={setPresets} currencyMode={currencyMode} fmt={fmt} />
+              </section>
+            )}
+
+            {view === "anolles" && (
+              <section className="space-y-3">
+                <h2 className="text-xl font-semibold">Anolles</h2>
+                <Anolles lots={ANOLLE_LOTS} addLot={addLotToCart} currencyMode={currencyMode} fmt={fmt} />
+              </section>
+            )}
+
+            {view === "vendors" && (
+              <section className="space-y-3">
+                <h2 className="text-xl font-semibold">Vendors</h2>
+                <Vendors products={mockProducts} />
+              </section>
+            )}
+
+            {view === "orders" && (
+              <section className="space-y-3">
+                <h2 className="text-xl font-semibold">Orders</h2>
+                <Orders orders={orders} fmt={fmt} onProgressById={progressOrderById} />
+              </section>
+            )}
+
+            {view === "admin" && (
+              <section className="space-y-3">
+                <h2 className="text-xl font-semibold">Admin</h2>
+                <Admin products={mockProducts} currencyMode={currencyMode} fmt={fmt} symbol={symbol} setSymbol={setSymbol} fx={fx} setFx={setFx} gbpPerLmc={gbpPerLmc} setGbpPerLmc={setGbpPerLmc} />
+              </section>
+            )}
+          </main>
+
+          {/* Drawers / Modals */}
+          <CartPanel open={cartOpen} onClose={()=>setCartOpen(false)} cart={cart} setCart={setCart} checkout={goCheckout} currencyMode={currencyMode} fmt={fmt} />
+          <WalletModal open={walletOpen} onClose={()=>setWalletOpen(false)} wallet={wallet} setWallet={setWallet} />
+          <CheckoutModal open={checkoutOpen} onClose={handleCheckoutClose} totalGBP={totalGBP} wallet={wallet} setWallet={setWallet} currencyMode={currencyMode} fmt={fmt} gbpPerLmc={gbpPerLmc} />
+          <OrderSuccessModal open={orderSuccessOpen} onClose={()=>setOrderSuccessOpen(false)} order={lastOrder} openChat={(ock)=>{ setChatPrefillOCK(ock); setChatOpen(true); }} />
+          <ChatFab onOpen={()=>setChatOpen(true)} />
+          <ChatDrawer
+            open={chatOpen}
+            onClose={()=>setChatOpen(false)}
+            prefillOCK={chatPrefillOCK}
+            onAgentConfirm={(ock)=>{ confirmOrderByOCK(ock); }}
+            getOrderByOCK={(ock)=>orders.find(o=>o.ock===ock)}
+            onProgress={(ock,next)=>progressOrderByOCK(ock,next)}
+          />
+
+          <footer className="mt-8 border-t">
+            <div className="mx-auto max-w-7xl px-4 py-6 text-xs text-neutral-500">
+              © {new Date().getFullYear()} Lumera Market — Ethical supply for Anolles. Fair pricing. Treasury funding via 10% split.
+            </div>
+          </footer>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
