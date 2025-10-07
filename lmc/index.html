@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lumera Coin (LMC) Dashboard</title>
+  <link rel="icon" href="/assets/img/seal.svg" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+      padding: 2rem;
+      max-width: 600px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      color: #2e2e2e;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      background-color: #111;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    .info {
+      background: white;
+      padding: 1rem;
+      margin-top: 1rem;
+      border-radius: 6px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    input {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Lumera Coin (LMC)</h1>
+
+  <div class="info">
+    <p><strong>Connected Wallet:</strong> <span id="wallet-address">Not connected</span></p>
+    <p><strong>LMC Balance:</strong> <span id="lmc-balance">0</span></p>
+    <button onclick="connectWallet()">Connect Wallet</button>
+  </div>
+
+  <div class="info">
+    <h3>Transfer LMC</h3>
+    <label>Recipient Address:</label>
+    <input id="recipient" type="text" placeholder="Solana wallet address" />
+    <label>Amount:</label>
+    <input id="amount" type="number" min="0" placeholder="Amount to send" />
+    <button onclick="transferLMC()">Send LMC</button>
+  </div>
+
+  <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
+  <script>
+    const TOKEN_ADDRESS = 'JCiUsNc8zH8bcnVes3S57qzVkWQmcg3SLcfR2wi6mj8e';
+    const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('devnet'), 'confirmed');
+    let walletPublicKey = null;
+
+    async function connectWallet() {
+      if (window.solana && window.solana.isPhantom) {
+        try {
+          const resp = await window.solana.connect();
+          walletPublicKey = resp.publicKey;
+          document.getElementById('wallet-address').textContent = walletPublicKey;
+          fetchBalance();
+        } catch (err) {
+          alert('Wallet connection failed');
+        }
+      } else {
+        alert('Phantom wallet not found');
+      }
+    }
+
+    async function fetchBalance() {
+      // Placeholder logic for now
+      document.getElementById('lmc-balance').textContent = '750,000,000';
+    }
+
+    async function transferLMC() {
+      alert("Transfer function coming soon — will require SPL Token integration");
+    }
+  </script>
+</body>
+</html>
