@@ -38,6 +38,12 @@
       padding: 0.5rem;
       margin-top: 0.5rem;
     }
+    a {
+      display: inline-block;
+      margin-top: 1rem;
+      text-decoration: none;
+      color: #0056d6;
+    }
   </style>
 </head>
 <body>
@@ -58,6 +64,10 @@
     <button onclick="transferLMC()">Send LMC</button>
   </div>
 
+  <div class="info">
+    <a id="explorer-link" href="#" target="_blank">View Token on Solana Explorer</a>
+  </div>
+
   <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
   <script>
     const TOKEN_ADDRESS = 'JCiUsNc8zH8bcnVes3S57qzVkWQmcg3SLcfR2wi6mj8e';
@@ -70,6 +80,7 @@
           const resp = await window.solana.connect();
           walletPublicKey = resp.publicKey;
           document.getElementById('wallet-address').textContent = walletPublicKey;
+          document.getElementById('explorer-link').href = `https://explorer.solana.com/address/${TOKEN_ADDRESS}?cluster=devnet`;
           fetchBalance();
         } catch (err) {
           alert('Wallet connection failed');
@@ -80,12 +91,76 @@
     }
 
     async function fetchBalance() {
-      // Placeholder logic for now
-      document.getElementById('lmc-balance').textContent = '750,000,000';
+      try {
+        const tokenAccounts = await connection.getParsedTokenAccountsByOwner(walletPublicKey, {
+          mint: new solanaWeb3.PublicKey(TOKEN_ADDRESS),
+        });
+
+        const accountInfo = tokenAccounts.value[0]?.account?.data?.parsed?.info;
+        const balance = accountInfo?.tokenAmount?.uiAmount ?? 0;
+
+        document.getElementById('lmc-balance').textContent = balance.toLocaleString();
+      } catch (err) {
+        console.error('Failed to fetch balance:', err);
+        document.getElementById('lmc-balance').textContent = 'Error';
+      }
     }
 
     async function transferLMC() {
-      alert("Transfer function coming soon — will require SPL Token integration");
+      try {
+        const recipient = document.getElementById('recipient').value.trim();
+        const amount = parseFloat(document.getElementById('amount').value);
+
+        if (!recipient || isNaN(amount) || amount <= 0) {
+          alert('Enter valid recipient and amount');
+          return;
+        }
+
+        const recipientPubkey = new solanaWeb3.PublicKey(recipient);
+        const mintPubkey = new solanaWeb3.PublicKey(TOKEN_ADDRESS);
+
+        const senderTokenAccounts = await connection.getTokenAccountsByOwner(walletPublicKey, {
+          mint: mintPubkey
+        });
+
+        if (senderTokenAccounts.value.length === 0) {
+          alert('No token account found for sender.');
+          return;
+        }
+
+        const senderTokenAccountPubkey = senderTokenAccounts.value[0].pubkey;
+
+        const recipientTokenAccounts = await connection.getTokenAccountsByOwner(recipientPubkey, {
+          mint: mintPubkey
+        });
+
+        let recipientTokenAccountPubkey;
+
+        if (recipientTokenAccounts.value.length === 0) {
+          alert('Recipient does not have an associated LMC account. Please create one manually.');
+          return;
+        } else {
+          recipientTokenAccountPubkey = recipientTokenAccounts.value[0].pubkey;
+        }
+
+        const transaction = new solanaWeb3.Transaction().add(
+          solanaWeb3.Token.createTransferInstruction(
+            solanaWeb3.TOKEN_PROGRAM_ID,
+            senderTokenAccountPubkey,
+            recipientTokenAccountPubkey,
+            walletPublicKey,
+            [],
+            amount * 1e6 // assuming 6 decimals, adjust if different
+          )
+        );
+
+        const { signature } = await window.solana.signAndSendTransaction(transaction);
+        alert('Transfer successful! Signature: ' + signature);
+        fetchBalance();
+      } catch (err) {
+        console.error('Transfer error:', err);
+        alert('Transfer failed. See console for details.');
+      }
     }
   </script>
 </body>
