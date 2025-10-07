@@ -1,0 +1,8 @@
+{
+  "name": "Lumera Coin",
+  "symbol": "LMC",
+  "description": "The official digital currency of Lumera. Commodity-backed, community-first.",
+  "image": "https://black-neat-trout-951.mypinata.cloud/ipfs/bafkreieph36vzjcyqz7qs2dwsi3qrypg3r4srcv3nhsc6r2ajg5pilyn6i",
+  "decimals": 9,
+  "tags": ["currency", "Lumera", "LMC"]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "Lumera Coin",
+  "symbol": "LMC",
+  "description": "Currency of the Lumera civilization",
+  "image": "lmc-logo.png",
+  "properties": {
+    "files": [
+      {
+        "uri": "lmc-logo.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

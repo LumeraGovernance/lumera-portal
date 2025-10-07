@@ -70,8 +70,8 @@
 
   <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
   <script>
-    const TOKEN_ADDRESS = 'JCiUsNc8zH8bcnVes3S57qzVkWQmcg3SLcfR2wi6mj8e';
-    const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('devnet'), 'confirmed');
+    const TOKEN_ADDRESS = 'E6aCV5B918YdrunKan1w1qP9V3tDCNvgoaGf3JefBeD3';
+    const connection = new Connection("https://api.mainnet-beta.solana.com", "confirmed");
     let walletPublicKey = null;
 
     async function connectWallet() {
