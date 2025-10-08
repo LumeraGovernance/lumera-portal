@@ -1,21 +1,94 @@
-<section style="max-width: 600px; margin: 2rem auto; padding: 1.5rem; border: 2px solid #ddd; border-radius: 12px; text-align: center; font-family: sans-serif;">
-  <img src="https://black-neat-trout-951.mypinata.cloud/ipfs/bafkreieph36vzjcyqz7qs2dwsi3qrypg3r4srcv3nhsc6r2ajg5pilyn6i" alt="Lumera Coin Logo" style="width: 150px; border-radius: 8px; margin-bottom: 1rem;">
-  <h2 style="margin-bottom: 0.5rem;">🌕 Lumera Coin (LMC)</h2>
-  <p style="font-size: 1rem; color: #444;">The official currency of Lumera – A symbol of unity, growth, and governance.</p>
-  
-  <div style="margin-top: 1rem; font-size: 0.9rem;">
-    <p><strong>Token Address:</strong><br><code>CT13yHmZ87VgqxqxVJWmDh2SmtUyPn1H9FEPwcNRy97p</code></p>
-    
-    <p><strong>View on Explorer:</strong><br>
-      <a href="https://explorer.solana.com/tx/4SGDWv1oYHzd4bHNL1prc82ifG6WSWT39yCGrEFbZQme5ckUh91unb5BHKBeBD4taMWW1LAkCAqFHppd68tcX1Tc?cluster=devnet" target="_blank">
-        Solana Devnet Explorer
-      </a>
-    </p>
-    
-    <p><strong>Metadata:</strong><br>
-      <a href="https://core.metaplex.com/explorer/CT13yHmZ87VgqxqxVJWmDh2SmtUyPn1H9FEPwcNRy97p" target="_blank">
-        View on Metaplex Core
-      </a>
-    </p>
-  </div>
-</section>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lumera Coin (LMC)</title>
+  <script src="https://unpkg.com/@solana/wallet-adapter-wallets"></script>
+  <script src="https://unpkg.com/@solana/wallet-adapter-base"></script>
+  <script src="https://unpkg.com/@solana/wallet-adapter-wallets"></script>
+  <script src="https://unpkg.com/@solana/wallet-adapter-react"></script>
+  <script src="https://unpkg.com/@solana/wallet-adapter-react-ui"></script>
+  <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@solana/wallet-adapter-wallets@0.19.7/lib/index.umd.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@solana/wallet-adapter-react-ui/styles.css" />
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f9f9f9;
+      padding: 40px;
+      max-width: 600px;
+      margin: auto;
+      text-align: center;
+    }
+    img.logo {
+      width: 100px;
+      height: 100px;
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 12px 20px;
+      background-color: #4caf50;
+      border: none;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 6px;
+      margin-top: 20px;
+    }
+    button:disabled {
+      background-color: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <img src="https://black-neat-trout-951.mypinata.cloud/ipfs/bafkreieph36vzjcyqz7qs2dwsi3qrypg3r4srcv3nhsc6r2ajg5pilyn6i" alt="LMC Logo" class="logo">
+  <h1>Lumera Coin (LMC)</h1>
+  <p><strong>Mint Address:</strong> F6eET2ipLrqSMnpoZfqoLYn7bWxRTwgs8SwNUf7YtVTp</p>
+  <p><strong>Symbol:</strong> LMC</p>
+  <p><strong>Description:</strong> The official currency of Lumera.</p>
+  <p>
+    <a href="https://explorer.solana.com/address/F6eET2ipLrqSMnpoZfqoLYn7bWxRTwgs8SwNUf7YtVTp?cluster=mainnet-beta" target="_blank">
+      View on Solana Explorer
+    </a>
+  </p>
+
+  <!-- Wallet Connect UI -->
+  <div id="wallet-connect"></div>
+
+  <!-- Buy LMC (future functionality) -->
+  <button id="buy-lmc" disabled>Buy LMC</button>
+
+  <script>
+    async function loadWallet() {
+      const { Connection, clusterApiUrl, PublicKey } = solanaWeb3;
+      const connection = new Connection(clusterApiUrl('mainnet-beta'));
+
+      const provider = window.solana;
+      const connectBtn = document.getElementById('buy-lmc');
+
+      if (provider && provider.isPhantom) {
+        const walletDiv = document.getElementById('wallet-connect');
+        const connectBtn = document.createElement('button');
+        connectBtn.textContent = 'Connect Wallet';
+        connectBtn.onclick = async () => {
+          try {
+            const resp = await provider.connect();
+            console.log('Connected to wallet', resp.publicKey.toString());
+            connectBtn.textContent = 'Wallet Connected';
+            connectBtn.disabled = true;
+            document.getElementById('buy-lmc').disabled = false;
+          } catch (err) {
+            console.error(err);
+          }
+        };
+        walletDiv.appendChild(connectBtn);
+      } else {
+        alert('Phantom wallet not found. Please install it from https://phantom.app');
+      }
+    }
+
+    loadWallet();
+  </script>
+</body>
+</html>
