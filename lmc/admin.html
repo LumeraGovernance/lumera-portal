@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LMC Admin Sender</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.98.0/lib/index.iife.min.js"></script>
+  <script type="module" src="./admin.js"></script>
+</head>
+<body>
+  <main class="card">
+    <h1>LMC Admin Sender</h1>
+    <p class="muted small">Connect the <b>treasury wallet</b> to fulfil purchases by sending LMC to buyers.</p>
+
+    <section class="section">
+      <button id="connectAdmin" class="btn">Connect Phantom (Treasury)</button>
+      <div class="muted small">Connected: <span id="adminAddr">Not connected</span></div>
+      <div id="gate" class="muted small"></div>
+    </section>
+
+    <section class="section">
+      <label>Recipient (buyer) address</label>
+      <input id="recipient" type="text" placeholder="Buyer’s wallet address">
+      <label>Amount (LMC)</label>
+      <input id="lmcAmount" type="number" min="1" step="1" placeholder="e.g. 100">
+      <button id="sendBtn" class="btn primary">Send LMC</button>
+    </section>
+
+    <div id="status" class="status"></div>
+  </main>
+</body>
+</html>

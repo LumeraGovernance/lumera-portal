@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lumera Coin (LMC) Dashboard</title>
+  <link rel="icon" href="/assets/img/seal.svg" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+      padding: 2rem;
+      max-width: 600px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      color: #2e2e2e;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      background-color: #111;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    .info {
+      background: white;
+      padding: 1rem;
+      margin-top: 1rem;
+      border-radius: 6px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    input {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    a {
+      display: inline-block;
+      margin-top: 1rem;
+      text-decoration: none;
+      color: #0056d6;
+    }
+  </style>
+</head>
+<body>
+  <h1>Lumera Coin (LMC)</h1>
+
+  <div class="info">
+    <p><strong>Connected Wallet:</strong> <span id="wallet-address">Not connected</span></p>
+    <p><strong>LMC Balance:</strong> <span id="lmc-balance">0</span></p>
+    <button onclick="connectWallet()">Connect Wallet</button>
+  </div>
+
+  <div class="info">
+    <h3>Transfer LMC</h3>
+    <label>Recipient Address:</label>
+    <input id="recipient" type="text" placeholder="Solana wallet address" />
+    <label>Amount:</label>
+    <input id="amount" type="number" min="0" placeholder="Amount to send" />
+    <button onclick="transferLMC()">Send LMC</button>
+  </div>
+
+  <div class="info">
+    <a id="explorer-link" href="https://explorer.solana.com/address/JCiUsNc8zH8bcnVes3S57qzVkWQmcg3SLcfR2wi6mj8e" target="_blank">View Token on Solana Explorer</a>
+  </div>
+
+  <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
+  <script>
+    const TOKEN_ADDRESS = 'E6aCV5B918YdrunKan1w1qP9V3tDCNvgoaGf3JefBeD3';
+    const connection = new Connection("https://api.mainnet-beta.solana.com", "confirmed");
+    let walletPublicKey = null;
+
+    async function connectWallet() {
+      if (window.solana && window.solana.isPhantom) {
+        try {
+          const resp = await window.solana.connect();
+          walletPublicKey = resp.publicKey;
+          document.getElementById('wallet-address').textContent = walletPublicKey;
+          document.getElementById('explorer-link').href = `https://explorer.solana.com/address/${TOKEN_ADDRESS}?cluster=devnet`;
+          fetchBalance();
+        } catch (err) {
+          alert('Wallet connection failed');
+        }
+      } else {
+        alert('Phantom wallet not found');
+      }
+    }
+
+    async function fetchBalance() {
+      try {
+        const tokenAccounts = await connection.getParsedTokenAccountsByOwner(walletPublicKey, {
+          mint: new solanaWeb3.PublicKey(TOKEN_ADDRESS),
+        });
+
+        const accountInfo = tokenAccounts.value[0]?.account?.data?.parsed?.info;
+        const balance = accountInfo?.tokenAmount?.uiAmount ?? 0;
+
+        document.getElementById('lmc-balance').textContent = balance.toLocaleString();
+      } catch (err) {
+        console.error('Failed to fetch balance:', err);
+        document.getElementById('lmc-balance').textContent = 'Error';
+      }
+    }
+
+    async function transferLMC() {
+      try {
+        const recipient = document.getElementById('recipient').value.trim();
+        const amount = parseFloat(document.getElementById('amount').value);
+
+        if (!recipient || isNaN(amount) || amount <= 0) {
+          alert('Enter valid recipient and amount');
+          return;
+        }
+
+        const recipientPubkey = new solanaWeb3.PublicKey(recipient);
+        const mintPubkey = new solanaWeb3.PublicKey(TOKEN_ADDRESS);
+
+        const senderTokenAccounts = await connection.getTokenAccountsByOwner(walletPublicKey, {
+          mint: mintPubkey
+        });
+
+        if (senderTokenAccounts.value.length === 0) {
+          alert('No token account found for sender.');
+          return;
+        }
+
+        const senderTokenAccountPubkey = senderTokenAccounts.value[0].pubkey;
+
+        const recipientTokenAccounts = await connection.getTokenAccountsByOwner(recipientPubkey, {
+          mint: mintPubkey
+        });
+
+        let recipientTokenAccountPubkey;
+
+        if (recipientTokenAccounts.value.length === 0) {
+          alert('Recipient does not have an associated LMC account. Please create one manually.');
+          return;
+        } else {
+          recipientTokenAccountPubkey = recipientTokenAccounts.value[0].pubkey;
+        }
+
+        const transaction = new solanaWeb3.Transaction().add(
+          solanaWeb3.Token.createTransferInstruction(
+            solanaWeb3.TOKEN_PROGRAM_ID,
+            senderTokenAccountPubkey,
+            recipientTokenAccountPubkey,
+            walletPublicKey,
+            [],
+            amount * 1e6 // assuming 6 decimals, adjust if different
+          )
+        );
+
+        const { signature } = await window.solana.signAndSendTransaction(transaction);
+        alert('Transfer successful! Signature: ' + signature);
+        fetchBalance();
+      } catch (err) {
+        console.error('Transfer error:', err);
+        alert('Transfer failed. See console for details.');
+      }
+    }
+  </script>
+</body>
+</html>
