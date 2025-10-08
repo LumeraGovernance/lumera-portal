@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Buy Lumera Coin (LMC)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 500px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin: 0 auto;
+    }
+    input[type="number"] {
+      padding: 10px;
+      width: 100%;
+      font-size: 16px;
+      margin-top: 8px;
+      margin-bottom: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      padding: 12px;
+      width: 100%;
+      font-size: 16px;
+      background-color: #0b7285;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #09627a;
+    }
+    .summary {
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    .wallet-info {
+      font-size: 13px;
+      margin-top: 20px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Buy Lumera Coin (LMC)</h2>
+    <label for="lmcAmount">Enter amount of LMC you want to buy:</label>
+    <input type="number" id="lmcAmount" placeholder="e.g., 100" min="1" />
+
+    <div class="summary" id="solEstimate"></div>
+
+    <button onclick="buyLMC()">Buy Now</button>
+
+    <div class="wallet-info">
+      Payments go to Lumera Treasury:<br />
+      <code>23iGqnDQQeTHqxbrXt5N1pbVXZxCvJdn52KHQrkng97r</code>
+    </div>
+  </div>
+
+  <script>
+    const lmcToSolRate = 0.0001; // 1 LMC = 0.0001 SOL
+    const treasury = "23iGqnDQQeTHqxbrXt5N1pbVXZxCvJdn52KHQrkng97r";
+
+    const input = document.getElementById("lmcAmount");
+    const output = document.getElementById("solEstimate");
+
+    input.addEventListener("input", () => {
+      const lmc = parseFloat(input.value);
+      if (!isNaN(lmc) && lmc > 0) {
+        const sol = lmc * lmcToSolRate;
+        output.textContent = `You will pay ${sol.toFixed(4)} SOL for ${lmc} LMC.`;
+      } else {
+        output.textContent = "";
+      }
+    });
+
+    function buyLMC() {
+      const lmc = parseFloat(input.value);
+      if (isNaN(lmc) || lmc <= 0) {
+        alert("Please enter a valid LMC amount.");
+        return;
+      }
+
+      const solAmount = (lmc * lmcToSolRate).toFixed(4);
+      const phantomUrl = `https://phantom.app/ul/browse/send?recipient=${treasury}&amount=${solAmount}&reference=lumera-buy&label=Lumera%20Treasury&message=Buying%20${lmc}%20LMC`;
+
+      window.open(phantomUrl, '_blank');
+    }
+  </script>
+</body>
+</html>
