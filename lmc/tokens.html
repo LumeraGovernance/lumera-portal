@@ -1,94 +1,116 @@
+<!-- Buy LMC Widget - Integrated and Branded -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lumera Coin (LMC)</title>
-  <script src="https://unpkg.com/@solana/wallet-adapter-wallets"></script>
-  <script src="https://unpkg.com/@solana/wallet-adapter-base"></script>
-  <script src="https://unpkg.com/@solana/wallet-adapter-wallets"></script>
-  <script src="https://unpkg.com/@solana/wallet-adapter-react"></script>
-  <script src="https://unpkg.com/@solana/wallet-adapter-react-ui"></script>
-  <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@solana/wallet-adapter-wallets@0.19.7/lib/index.umd.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@solana/wallet-adapter-react-ui/styles.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Buy LMC</title>
+  <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@latest/lib/index.iife.min.js"></script>
   <style>
     body {
-      font-family: sans-serif;
-      background-color: #f9f9f9;
-      padding: 40px;
-      max-width: 600px;
-      margin: auto;
+      font-family: 'Segoe UI', sans-serif;
+      background: #0b0c10;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: #1f1f1f;
+      border: 2px solid #facc15;
+      padding: 30px;
+      border-radius: 16px;
       text-align: center;
+      width: 350px;
     }
-    img.logo {
-      width: 100px;
-      height: 100px;
+    .logo {
+      width: 80px;
+      margin-bottom: 10px;
+    }
+    .title {
+      font-size: 24px;
       margin-bottom: 20px;
+      color: #facc15;
     }
-    button {
-      padding: 12px 20px;
-      background-color: #4caf50;
+    .button, select {
+      margin-top: 15px;
+      padding: 10px 20px;
+      background: #facc15;
       border: none;
-      color: white;
-      font-size: 16px;
+      color: #000;
+      font-weight: bold;
+      border-radius: 8px;
       cursor: pointer;
-      border-radius: 6px;
-      margin-top: 20px;
     }
-    button:disabled {
-      background-color: #ccc;
+    .button:hover {
+      background: #fcd34d;
     }
   </style>
 </head>
 <body>
-  <img src="https://black-neat-trout-951.mypinata.cloud/ipfs/bafkreieph36vzjcyqz7qs2dwsi3qrypg3r4srcv3nhsc6r2ajg5pilyn6i" alt="LMC Logo" class="logo">
-  <h1>Lumera Coin (LMC)</h1>
-  <p><strong>Mint Address:</strong> F6eET2ipLrqSMnpoZfqoLYn7bWxRTwgs8SwNUf7YtVTp</p>
-  <p><strong>Symbol:</strong> LMC</p>
-  <p><strong>Description:</strong> The official currency of Lumera.</p>
-  <p>
-    <a href="https://explorer.solana.com/address/F6eET2ipLrqSMnpoZfqoLYn7bWxRTwgs8SwNUf7YtVTp?cluster=mainnet-beta" target="_blank">
-      View on Solana Explorer
-    </a>
-  </p>
+  <div class="container">
+    <img src="/lmc/lmc-logo.png" alt="Lumera Coin Logo" class="logo">
+    <div class="title">Buy LMC</div>
 
-  <!-- Wallet Connect UI -->
-  <div id="wallet-connect"></div>
+    <div>
+      <label for="amount">Select LMC Amount:</label>
+      <select id="amount">
+        <option value="1">1 LMC</option>
+        <option value="10">10 LMC</option>
+        <option value="50">50 LMC</option>
+        <option value="100">100 LMC</option>
+      </select>
+    </div>
 
-  <!-- Buy LMC (future functionality) -->
-  <button id="buy-lmc" disabled>Buy LMC</button>
+    <button class="button" onclick="buyLMC()">Buy Now</button>
+
+    <p id="status"></p>
+  </div>
 
   <script>
-    async function loadWallet() {
-      const { Connection, clusterApiUrl, PublicKey } = solanaWeb3;
-      const connection = new Connection(clusterApiUrl('mainnet-beta'));
+    const treasury = "23iGqnDQQeTHqxbrXt5N1pbVXZxCvJdn52KHQrkng97r";
 
-      const provider = window.solana;
-      const connectBtn = document.getElementById('buy-lmc');
+    async function buyLMC() {
+      const amountLMC = parseInt(document.getElementById("amount").value);
+      const status = document.getElementById("status");
+      try {
+        if (!window.solana || !window.solana.isPhantom) {
+          return alert("Please install Phantom wallet.");
+        }
 
-      if (provider && provider.isPhantom) {
-        const walletDiv = document.getElementById('wallet-connect');
-        const connectBtn = document.createElement('button');
-        connectBtn.textContent = 'Connect Wallet';
-        connectBtn.onclick = async () => {
-          try {
-            const resp = await provider.connect();
-            console.log('Connected to wallet', resp.publicKey.toString());
-            connectBtn.textContent = 'Wallet Connected';
-            connectBtn.disabled = true;
-            document.getElementById('buy-lmc').disabled = false;
-          } catch (err) {
-            console.error(err);
-          }
-        };
-        walletDiv.appendChild(connectBtn);
-      } else {
-        alert('Phantom wallet not found. Please install it from https://phantom.app');
+        await window.solana.connect();
+        const provider = window.solana;
+        const connection = new solanaWeb3.Connection("https://api.mainnet-beta.solana.com");
+
+        const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd");
+        const data = await res.json();
+        const solPerUsd = 1 / data.solana.usd;
+
+        const lamports = Math.round(amountLMC * solPerUsd * solanaWeb3.LAMPORTS_PER_SOL);
+
+        const transaction = new solanaWeb3.Transaction().add(
+          solanaWeb3.SystemProgram.transfer({
+            fromPubkey: provider.publicKey,
+            toPubkey: new solanaWeb3.PublicKey(treasury),
+            lamports,
+          })
+        );
+
+        const { blockhash } = await connection.getRecentBlockhash();
+        transaction.recentBlockhash = blockhash;
+        transaction.feePayer = provider.publicKey;
+
+        const signed = await provider.signTransaction(transaction);
+        const signature = await connection.sendRawTransaction(signed.serialize());
+
+        status.innerText = `Transaction sent: https://explorer.solana.com/tx/${signature}?cluster=mainnet-beta`;
+      } catch (err) {
+        console.error(err);
+        status.innerText = "Transaction failed. Check console.";
       }
     }
-
-    loadWallet();
   </script>
 </body>
 </html>
