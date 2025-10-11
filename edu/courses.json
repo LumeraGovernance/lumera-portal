@@ -91,6 +91,50 @@
         ]
       }
     ]
+  },
+  
+  {
+    "id": "lumeran-phonology",
+    "title": "Lumeran Phonology Reference & Practice",
+    "category": "Language",
+    "level": "Core Reference",
+    "durationMinutes": 90,
+    "summary": "A complete phonemic inventory of Lumeran, including consonant and vowel charts based on articulatory placement and features. Includes pronunciation exercises and practice examples.",
+    "hero": "https://images.unsplash.com/photo-1528209392022-6e1e3b6c2c5b?q=80&w=1600&auto=format&fit=crop",
+    "modules": [
+      {
+        "id": "module-1-consonants",
+        "title": "Module 1 – Consonant Inventory",
+        "lessons": [
+          {
+            "id": "consonant-chart",
+            "title": "Lumeran Consonant Table",
+            "contentHTML": "<p>The following table lists all consonant phonemes of Lumeran, organized by place and manner of articulation.</p><table><thead><tr><th>Manner</th><th>Labial</th><th>Labio-Dental</th><th>Labio-Velar</th><th>Apico-Dental</th><th>Inter-Dental</th><th>Apico-Alveolar</th><th>Alveolar Retroflex</th><th>Alveolo-Palatal</th><th>Palatal</th><th>Velar</th><th>Uvular</th><th>Glottal</th><th>Lateral</th></tr></thead><tbody><tr><td>Stop</td><td>p b</td><td></td><td></td><td>t d</td><td></td><td></td><td></td><td></td><td></td><td>k g</td><td></td><td>ʼ</td><td></td></tr><tr><td>Fricative</td><td>f v</td><td></td><td></td><td>ṭ ḍ</td><td></td><td>s z</td><td>š ž</td><td>ç</td><td></td><td>x</td><td></td><td>h</td><td>ɬ</td></tr><tr><td>Affricate</td><td></td><td></td><td></td><td></td><td></td><td>c ʒ</td><td>č j</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>Nasal</td><td>m</td><td></td><td></td><td>n</td><td></td><td></td><td></td><td></td><td></td><td>ɲ</td><td></td><td></td><td></td></tr><tr><td>Liquid (Flap / Trill)</td><td></td><td></td><td></td><td></td><td></td><td>r</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>Approximant</td><td>w</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>y</td><td></td><td></td><td></td><td>l</td></tr><tr><td>Special</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>ř (rhotic approximant)</td></tr></tbody></table>"
+          },
+          {
+            "id": "consonant-practice",
+            "title": "Pronunciation Practice: Consonants",
+            "contentHTML": "<p>Practice the following Lumeran consonant series by reading aloud each line smoothly:</p><ul><li><strong>Stops:</strong> pa, ta, ka, ba, da, ga</li><li><strong>Fricatives:</strong> sa, za, ša, ža, fa, va, ha</li><li><strong>Nasals:</strong> ma, na, ña</li><li><strong>Liquids & Approximants:</strong> la, ra, ya, wa, řa</li></ul><div class='prompt'>📝 Optional: Record your own pronunciation of each series and compare clarity and rhythm.</div>"
+          }
+        ]
+      },
+      {
+        "id": "module-2-vowels",
+        "title": "Module 2 – Vowel Inventory",
+        "lessons": [
+          {
+            "id": "vowel-chart",
+            "title": "Lumeran Vowel Table",
+            "contentHTML": "<p>The Lumeran vowel system balances front–back and rounded–unrounded contrasts with nine primary vowels.</p><table><thead><tr><th></th><th colspan='2'>Front</th><th colspan='2'>Central</th><th colspan='2'>Back</th></tr><tr><th>Height</th><th>Unrounded</th><th>Rounded</th><th>Unrounded</th><th>Rounded</th><th>Unrounded</th><th>Rounded</th></tr></thead><tbody><tr><td>High</td><td>i</td><td>ü</td><td></td><td></td><td></td><td>u</td></tr><tr><td>Mid</td><td>e</td><td>ö</td><td>ë</td><td></td><td></td><td>o</td></tr><tr><td>Low</td><td>ä</td><td></td><td></td><td></td><td>a</td><td></td></tr></tbody></table><p>Each vowel is pronounced clearly; there are no diphthongs in standard Lumeran. Stress typically falls on the penultimate syllable.</p>"
+          },
+          {
+            "id": "vowel-practice",
+            "title": "Pronunciation Practice: Vowels",
+            "contentHTML": "<p>Read these sequences aloud to master the sound spacing:</p><ul><li>a ä e ë i</li><li>o ö u ü</li><li>a e i o u</li></ul><p>Focus on keeping each vowel distinct and stable.</p><div class='prompt'>📝 Exercise: Write five pairs of Lumeran words that differ only by vowel contrast (e.g., <em>tala</em> vs <em>tëla</em>).</div>"
+          }
+        ]
+      }
+    ]
   }
 
 ]
