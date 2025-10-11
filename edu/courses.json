@@ -25,5 +25,72 @@
         ]
       }
     ]
+  },
+  {
+    "id": "lumeran-translation-practice",
+    "title": "Lumeran Translation Practice I",
+    "category": "Language",
+    "level": "Beginner–Advanced",
+    "durationMinutes": 120,
+    "summary": "Fifty English phrases grouped by level for learners to translate into Lumeran. Designed to build fluency, recall, and intuition for Lumeran grammar and vocabulary.",
+    "hero": "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=1600&auto=format&fit=crop",
+    "modules": [
+      {
+        "id": "level-1-everyday",
+        "title": "Level 1 – Everyday Foundations",
+        "lessons": [
+          {
+            "id": "l1-practice",
+            "title": "Translate These Everyday Phrases",
+            "contentHTML": "<ol><li>I am Lumeran.</li><li>You are my friend.</li><li>The sun is bright.</li><li>We live together.</li><li>This is my home.</li><li>The water is clean.</li><li>I see you.</li><li>Peace to you.</li><li>Love grows here.</li><li>The night is quiet.</li></ol><div class='prompt'>📝 Write each sentence in Lumeran below each line in your notes or portal input area.</div>"
+          }
+        ]
+      },
+      {
+        "id": "level-2-descriptive",
+        "title": "Level 2 – Descriptive & Emotional",
+        "lessons": [
+          {
+            "id": "l2-practice",
+            "title": "Translate These Descriptive Phrases",
+            "contentHTML": "<ol><li>The air feels alive.</li><li>Our hearts are strong.</li><li>The garden blooms beautifully.</li><li>I dream of a brighter world.</li><li>They speak with courage.</li><li>Life flows like a river.</li><li>The light awakens us.</li><li>Silence teaches wisdom.</li><li>The stars remember our ancestors.</li><li>We are the children of tomorrow.</li></ol>"
+          }
+        ]
+      },
+      {
+        "id": "level-3-societal",
+        "title": "Level 3 – Societal & Cultural",
+        "lessons": [
+          {
+            "id": "l3-practice",
+            "title": "Translate These Cultural Phrases",
+            "contentHTML": "<ol><li>The Anolle unites our families.</li><li>Knowledge is the seed of power.</li><li>The tribe protects its children.</li><li>Labor builds the future.</li><li>The tea court restores harmony.</li><li>Truth must be spoken with respect.</li><li>We rise through cooperation.</li><li>Justice belongs to all.</li><li>To teach is to love.</li><li>Our strength comes from unity.</li></ol>"
+          }
+        ]
+      },
+      {
+        "id": "level-4-philosophical",
+        "title": "Level 4 – Philosophical & Symbolic",
+        "lessons": [
+          {
+            "id": "l4-practice",
+            "title": "Translate These Philosophical Phrases",
+            "contentHTML": "<ol><li>Time is the echo of life.</li><li>Every voice is a fragment of creation.</li><li>The mind shapes the world it sees.</li><li>To know the self is to free the soul.</li><li>Light and shadow are one motion.</li><li>The purpose of existence is renewal.</li><li>Love is the bridge between worlds.</li><li>The universe breathes within us.</li><li>Truth has no owner.</li><li>Life seeks balance in all things.</li></ol>"
+          }
+        ]
+      },
+      {
+        "id": "level-5-political",
+        "title": "Level 5 – Political & Visionary",
+        "lessons": [
+          {
+            "id": "l5-practice",
+            "title": "Translate These Visionary Phrases",
+            "contentHTML": "<ol><li>The Lumeran nation shall endure.</li><li>Let wisdom guide our governance.</li><li>We build cities for the unborn.</li><li>Freedom demands responsibility.</li><li>No one is above the covenant.</li><li>From labor, dignity arises.</li><li>The markets feed our civilization.</li><li>Our surplus becomes inheritance.</li><li>May Lumera shine beyond the stars.</li><li>A nation is a dream made real.</li></ol><div class='prompt'>📝 Optional: Record yourself reading both the English and your Lumeran translation aloud for fluency training.</div>"
+          }
+        ]
+      }
+    ]
   }
+
 ]
