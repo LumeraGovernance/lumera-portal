@@ -2,93 +2,98 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vegan Chocolate Investor Portal</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Origin Nine Chocolate – Investor Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  body{font-family:'Inter',sans-serif;background:#fafafa;margin:0;color:#222;}
-  header{background:#3b3b3b;color:#fff;padding:2rem;text-align:center;}
-  main{max-width:900px;margin:2rem auto;padding:1rem;}
-  .search-box{display:flex;gap:.5rem;margin:2rem 0;}
-  input[type="text"]{flex:1;padding:.75rem;border:1px solid #ccc;border-radius:.5rem;}
-  button{background:#1e88e5;color:#fff;border:none;border-radius:.5rem;padding:.75rem 1.2rem;cursor:pointer;}
-  button:hover{background:#1565c0;}
-  .faq{background:#fff;border:1px solid #ddd;border-radius:.75rem;margin-bottom:1rem;padding:1rem;}
-  .faq h3{margin-top:0;}
-  form{background:#fff;border:1px solid #ddd;border-radius:.75rem;padding:1rem;margin-top:2rem;}
-  label{display:block;margin-top:.5rem;font-weight:600;}
-  textarea,input[type=email]{width:100%;padding:.5rem;border:1px solid #ccc;border-radius:.5rem;}
-  footer{text-align:center;padding:2rem;color:#888;}
+body{font-family:'Inter',sans-serif;background:#faf9f6;margin:0;color:#2b2b2b;}
+header{background:#3a2f2a;color:#fff;text-align:center;padding:2.5rem 1rem;}
+header h1{margin:0;font-size:2rem;}
+main{max-width:950px;margin:2rem auto;padding:1rem;}
+.search-box{position:relative;display:flex;flex-direction:column;gap:.5rem;margin:1rem 0;}
+input[type=text]{padding:.75rem;border:1px solid #ccc;border-radius:.5rem;}
+button{background:#5a3827;color:#fff;border:none;border-radius:.5rem;padding:.75rem 1.2rem;cursor:pointer;}
+button:hover{background:#432a1f;}
+.suggestions{background:#fff;border:1px solid #ccc;border-top:none;border-radius:0 0 .5rem .5rem;
+             position:absolute;top:100%;left:0;right:0;z-index:10;max-height:200px;overflow-y:auto;}
+.suggestion{padding:.6rem;border-bottom:1px solid #eee;cursor:pointer;}
+.suggestion:hover{background:#f2f2f2;}
+.faq{background:#fff;border:1px solid #ddd;border-radius:.75rem;margin-bottom:1rem;padding:1rem;}
+form{background:#fff;border:1px solid #ddd;border-radius:.75rem;padding:1.5rem;}
+label{display:block;margin-top:.75rem;font-weight:600;}
+textarea,input[type=email]{width:100%;padding:.5rem;border:1px solid #ccc;border-radius:.5rem;}
+footer{text-align:center;padding:2rem;font-size:.9rem;color:#777;}
 </style>
 </head>
 <body>
 
 <header>
-  <h1>Invest in Pure Vegan Chocolate</h1>
-  <p>Plant-based craftsmanship, sustainable sourcing, and honest returns.</p>
-  <div style="margin-top:1rem">
-    <!-- Replace VIDEOID with your real YouTube or Vimeo ID -->
-    <iframe width="560" height="315" src="https://www.youtube.com/embed/VIDEOID"
-      title="Investor Pitch Video" frameborder="0" allowfullscreen></iframe>
-  </div>
+  <h1>Origin Nine Chocolate</h1>
+  <p>Invest in the next generation of plant-based luxury.</p>
 </header>
 
 <main>
   <section>
+    <h2>Investor Q&A</h2>
     <div class="search-box">
-      <input type="text" id="query" placeholder="Ask an investor question…">
+      <input type="text" id="query" placeholder="Ask an investor question…" oninput="showSuggestions(this.value)">
+      <div id="suggestions" class="suggestions" style="display:none;"></div>
       <button onclick="searchFAQ()">Search</button>
     </div>
   </section>
 
   <section id="results"></section>
 
-  <form id="requestForm" onsubmit="sendRequest(event)">
-    <h2>Didn’t find your answer?</h2>
-    <p>Submit your question and our team will respond and publish it soon.</p>
-    <label for="newQuestion">Your question</label>
-    <textarea id="newQuestion" rows="3" required></textarea>
-    <label for="email">Email (optional)</label>
-    <input type="email" id="email" placeholder="you@example.com">
-    <button type="submit">Request Answer</button>
-    <p id="reqStatus"></p>
-  </form>
+  <section>
+    <form id="requestForm" onsubmit="sendRequest(event)">
+      <h2>Didn’t find your answer?</h2>
+      <p>Submit your question and we’ll publish an answer soon.</p>
+      <label for="newQuestion">Your question</label>
+      <textarea id="newQuestion" rows="3" required></textarea>
+      <label for="email">Email (optional)</label>
+      <input type="email" id="email" placeholder="you@example.com">
+      <button type="submit">Request Answer</button>
+      <p id="reqStatus"></p>
+    </form>
+  </section>
 </main>
 
-<footer>© 2025 Pure Vegan Chocolate Ltd · Sustainably Made</footer>
+<footer>© 2025 Origin Nine Chocolate · Sustainable · Ethical · Delicious</footer>
 
 <script>
-const faqs = [
-  {
-    q:"What is Pure Vegan Chocolate?",
-    a:"A premium plant-based chocolate crafted from organic cacao and coconut milk. We focus on taste, ethics, and sustainability without dairy or refined additives."
-  },
-  {
-    q:"Why should investors consider this company?",
-    a:"Global demand for vegan chocolate is growing ~10 % annually. We’re positioned as a modern artisan brand that blends quality craftsmanship with scalable production."
-  },
-  {
-    q:"Where do you source your cacao?",
-    a:"From certified fair-trade farms in Ecuador and Ghana. Every batch is traceable and supports reforestation and farmer-education projects."
-  },
-  {
-    q:"How will investor funds be used?",
-    a:"Capital will expand our micro-factory, fund new flavours (hazelnut silk, sea-salt coconut), and increase marketing reach across UK retailers and cafés."
-  },
-  {
-    q:"What makes your chocolate unique?",
-    a:"We use multiple cacao varieties for layered flavour and melt profile—an innovation rarely used in vegan confectionery."
-  },
-  {
-    q:"Do you already sell products?",
-    a:"Yes. Our first bars launched locally in 2024 and are now stocked in select health stores. Revenue data and growth targets are shared in our investor deck."
-  },
-  {
-    q:"What sustainability measures are in place?",
-    a:"Packaging is compostable, ingredients are organic, and production runs on renewable energy. Every step is designed for zero-waste output."
-  }
+const faqs=[
+  {q:"What is Origin Nine Chocolate?",a:"A vegan chocolate brand using nine cacao varieties for richer taste and smoother texture."},
+  {q:"Why invest in vegan chocolate now?",a:"The vegan chocolate market is growing over 10% annually, driven by sustainability trends."},
+  {q:"How will funds be used?",a:"Investment supports scaling our micro-factory and marketing across UK retailers."},
+  {q:"Where is production based?",a:"Our pilot facility is located in the UK, with plans for expansion to Europe."},
+  {q:"How is your sourcing sustainable?",a:"We buy directly from farmer cooperatives, paying above fair-trade rates."},
+  {q:"What makes your chocolate different from competitors?",a:"We use multiple cacao varieties for complexity without dairy or emulsifiers."},
+  {q:"What are your current sales figures?",a:"Local launch generated £12,000 in 2024; 2025 retail pilots target £100,000+ turnover."},
+  {q:"What exit or return options exist for investors?",a:"Investors may receive equity or convertible notes, aiming for 3–5x ROI within 3–5 years."}
 ];
 
+// --- autocomplete ---
+function showSuggestions(value){
+  const list=document.getElementById('suggestions');
+  list.innerHTML='';
+  if(!value){list.style.display='none';return;}
+  const v=value.toLowerCase();
+  const matches=faqs.filter(f=>f.q.toLowerCase().includes(v));
+  if(matches.length){
+    matches.forEach(m=>{
+      const div=document.createElement('div');
+      div.className='suggestion';
+      div.textContent=m.q;
+      div.onclick=()=>{document.getElementById('query').value=m.q;list.style.display='none';searchFAQ();};
+      list.appendChild(div);
+    });
+    list.style.display='block';
+  }else{
+    list.style.display='none';
+  }
+}
+
+// --- search ---
 function searchFAQ(){
   const q=document.getElementById('query').value.toLowerCase();
   const results=document.getElementById('results');
@@ -104,13 +109,12 @@ function searchFAQ(){
   }else{
     results.innerHTML='<p>No existing answer found — please submit your question below.</p>';
   }
+  document.getElementById('suggestions').style.display='none';
 }
 
+// --- form submission (placeholder) ---
 function sendRequest(e){
   e.preventDefault();
-  const q=document.getElementById('newQuestion').value;
-  const email=document.getElementById('email').value;
-  // Later connect this to Google Sheets or Airtable backend
   document.getElementById('reqStatus').textContent="✅ Question submitted! We’ll reply soon.";
   e.target.reset();
 }
