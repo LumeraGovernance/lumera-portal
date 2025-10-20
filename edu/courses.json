@@ -92,38 +92,71 @@
       }
     ]
   },
-{
-    "id": "lumeran-phonology-and-pronunciation",
-    "title": "Lumeran Phonology and Pronunciation",
-    "category": "Language",
-    "level": "Beginner–Advanced",
-    "durationMinutes": 120,
-    "summary": "Lumeran Phonemes in an audio table for pronunciation practice and reference.",
-    "hero": "https://unsplash.com/photos/a-multicolored-image-of-a-number-of-zodiac-signs-dRhR8M9P-24",
-    "modules": [
-      {
-        "id": "vowels",
-        "title": "Vowels",
-        "lessons": [
-          {
-            "id": "vowels-chart",
-            "title": "Vowel Chart",
-            "contentHTML": "<table>\n  <tr>romanised symbol<th>Audio</th></tr>\n  <tr><td>a</td><audio controls><source src='edu/audio/a.mp3' type='audio/mpeg'></audio></tr>\n  <tr><td>ä</td><audio controls><source src='edu/audio/ä.mp3' type='audio/mpeg'></audio></tr>\n  </table>"
-          
-          }
-        ]
-      },
-      {
-        "id": "consonants",
-        "title": "Consonants",
-        "lessons": [
-          {
-            "id": "consonant-chart",
-            "title": "Consonant Chart",
-            "contentHTML": "<ol><li>The air feels alive.</li><li>Our hearts are strong.</li><li>The garden blooms beautifully.</li><li>I dream of a brighter world.</li><li>They speak with courage.</li><li>Life flows like a river.</li><li>The light awakens us.</li><li>Silence teaches wisdom.</li><li>The stars remember our ancestors.</li><li>We are the children of tomorrow.</li></ol>"
-          }
-        ]
-      }
-    ]
-  }
+  {
+  "id": "lumeran-phonology-course",
+  "title": "Lumeran Phonology I",
+  "category": "Language",
+  "level": "Beginner–Intermediate",
+  "durationMinutes": 90,
+  "summary": "Learn the full sound system of the Lumeran language — vowels, consonants, and special articulations. Each sound includes an audio example for pronunciation practice.",
+  "hero": "https://images.unsplash.com/photo-1527689368864-3a821dbccc34?q=80&w=1600&auto=format&fit=crop",
+  "modules": [
+    {
+      "id": "vowels",
+      "title": "Lesson 1 – Lumeran Vowels",
+      "lessons": [
+        {
+          "id": "l1-vowels",
+          "title": "Core Vowels",
+          "contentHTML": "<p>These are the primary vowels used in Lumeran. Listen carefully and repeat each sound aloud three times.</p><table class='ipa-table'><tr><th>Symbol</th><th>Audio</th></tr><tr><td>a</td><td><audio controls><source src='/edu/audio/a.mp3' type='audio/mpeg'></audio></td></tr><tr><td>ä</td><td><audio controls><source src='/edu/audio/ä.mp3' type='audio/mpeg'></audio></td></tr><tr><td>e</td><td><audio controls><source src='/edu/audio/e.mp3' type='audio/mpeg'></audio></td></tr><tr><td>ë</td><td><audio controls><source src='/edu/audio/ë.mp3' type='audio/mpeg'></audio></td></tr><tr><td>o</td><td><audio controls><source src='/edu/audio/o.mp3' type='audio/mpeg'></audio></td></tr><tr><td>ö</td><td><audio controls><source src='/edu/audio/ö.mp3' type='audio/mpeg'></audio></td></tr><tr><td>u</td><td><audio controls><source src='/edu/audio/u.mp3' type='audio/mpeg'></audio></td></tr><tr><td>ü</td><td><audio controls><source src='/edu/audio/ü.mp3' type='audio/mpeg'></audio></td></tr><tr><td>y</td><td><audio controls><source src='/edu/audio/y.mp3' type='audio/mpeg'></audio></td></tr></table>"
+        }
+      ]
+    },
+    {
+      "id": "stops-nasals",
+      "title": "Lesson 2 – Stops and Nasals",
+      "lessons": [
+        {
+          "id": "l2-stops",
+          "title": "Plosives and Nasals",
+          "contentHTML": "<p>Practice each plosive and nasal sound in Lumeran. Notice differences in voicing and place of articulation.</p><table class='ipa-table'><tr><th>Symbol</th><th>Audio</th></tr><tr><td>p</td><td><audio controls><source src='/edu/audio/p.mp3' type='audio/mpeg'></audio></td></tr><tr><td>t</td><td><audio controls><source src='/edu/audio/t.mp3' type='audio/mpeg'></audio></td></tr><tr><td>ṭ</td><td><audio controls><source src='/edu/audio/ṭ.mp3' type='audio/mpeg'></audio></td></tr><tr><td>k</td><td><audio controls><source src='/edu/audio/k.mp3' type='audio/mpeg'></audio></td></tr><tr><td>g</td><td><audio controls><source src='/edu/audio/g.mp3' type='audio/mpeg'></audio></td></tr><tr><td>n v2</td><td><audio controls><source src='/edu/audio/n v2.mp3' type='audio/mpeg'></audio></td></tr></table>"
+        }
+      ]
+    },
+    {
+      "id": "fricatives",
+      "title": "Lesson 3 – Fricatives and Affricates",
+      "lessons": [
+        {
+          "id": "l3-fricatives",
+          "title": "Fricatives and Affricates",
+          "contentHTML": "<p>These sounds involve partial airflow constriction, producing friction. Repeat each sound clearly.</p><table class='ipa-table'><tr><th>Symbol</th><th>Audio</th></tr><tr><td>č</td><td><audio controls><source src='/edu/audio/č.mp3' type='audio/mpeg'></audio></td></tr><tr><td>ç</td><td><audio controls><source src='/edu/audio/ç.mp3' type='audio/mpeg'></audio></td></tr><tr><td>š</td><td><audio controls><source src='/edu/audio/š.mp3' type='audio/mpeg'></audio></td></tr><tr><td>x</td><td><audio controls><source src='/edu/audio/x.mp3' type='audio/mpeg'></audio></td></tr><tr><td>x v2</td><td><audio controls><source src='/edu/audio/x v2.mp3' type='audio/mpeg'></audio></td></tr><tr><td>ž</td><td><audio controls><source src='/edu/audio/ž.mp3' type='audio/mpeg'></audio></td></tr></table>"
+        }
+      ]
+    },
+    {
+      "id": "liquids-trills",
+      "title": "Lesson 4 – Liquids and Trills",
+      "lessons": [
+        {
+          "id": "l4-liquids",
+          "title": "Liquids and Trills",
+          "contentHTML": "<p>These are resonant sounds that shape the musical quality of Lumeran speech. Practice each trill or lateral sound carefully.</p><table class='ipa-table'><tr><th>Symbol</th><th>Audio</th></tr><tr><td>l</td><td><audio controls><source src='/edu/audio/l.mp3' type='audio/mpeg'></audio></td></tr><tr><td>ɭ</td><td><audio controls><source src='/edu/audio/ɭ.mp3' type='audio/mpeg'></audio></td></tr><tr><td>r v1</td><td><audio controls><source src='/edu/audio/r v1.mp3' type='audio/mpeg'></audio></td></tr><tr><td>r v2</td><td><audio controls><source src='/edu/audio/r v2.mp3' type='audio/mpeg'></audio></td></tr><tr><td>r v3</td><td><audio controls><source src='/edu/audio/r v3.mp3' type='audio/mpeg'></audio></td></tr><tr><td>r v4</td><td><audio controls><source src='/edu/audio/r v4.mp3' type='audio/mpeg'></audio></td></tr><tr><td>ř</td><td><audio controls><source src='/edu/audio/ř.mp3' type='audio/mpeg'></audio></td></tr><tr><td>ř v2</td><td><audio controls><source src='/edu/audio/ř v2.mp3' type='audio/mpeg'></audio></td></tr></table>"
+        }
+      ]
+    },
+    {
+      "id": "specials",
+      "title": "Lesson 5 – Special Symbols and Extended Sounds",
+      "lessons": [
+        {
+          "id": "l5-specials",
+          "title": "Special or Contextual Sounds",
+          "contentHTML": "<p>These sounds occur in specific morphological or phonotactic contexts. Listen and repeat carefully.</p><table class='ipa-table'><tr><th>Symbol</th><th>Audio</th></tr><tr><td>d</td><td><audio controls><source src='/edu/audio/d.mp3' type='audio/mpeg'></audio></td></tr><tr><td>ḍ</td><td><audio controls><source src='/edu/audio/ḍ.mp3' type='audio/mpeg'></audio></td></tr><tr><td>h</td><td><audio controls><source src='/edu/audio/h.mp3' type='audio/mpeg'></audio></td></tr><tr><td>t</td><td><audio controls><source src='/edu/audio/t.mp3' type='audio/mpeg'></audio></td></tr><tr><td>ṭ</td><td><audio controls><source src='/edu/audio/ṭ.mp3' type='audio/mpeg'></audio></td></tr><tr><td>ẓ</td><td><audio controls><source src='/edu/audio/ẓ.mp3' type='audio/mpeg'></audio></td></tr></table>"
+        }
+      ]
+    }
+  ]
+}
+
 ]
