@@ -108,7 +108,7 @@
           {
             "id": "vowels-chart",
             "title": "Vowel Chart",
-            "contentHTML": "<table>\n  <tr>romanised symbol<th>Audio</th></tr>\n  <tr><td>a</td><audio controls><source src='edu/audio/a.mp3' type='audio/mp3'></audio></tr>\n  <tr><td>ä</td><audio controls><source src='edu/audio/ä.mp3' type='audio/mp3'></audio></tr>\n  </table>"
+            "contentHTML": "<table>\n  <tr>romanised symbol<th>Audio</th></tr>\n  <tr><td>a</td><audio controls><source src='edu/audio/a.mp3' type='audio/mpeg'></audio></tr>\n  <tr><td>ä</td><audio controls><source src='edu/audio/ä.mp3' type='audio/mpeg'></audio></tr>\n  </table>"
           
           }
         ]
