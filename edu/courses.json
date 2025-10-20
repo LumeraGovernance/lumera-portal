@@ -91,5 +91,39 @@
         ]
       }
     ]
+  },
+{
+    "id": "lumeran-phonology-and-pronunciation",
+    "title": "Lumeran Phonology and Pronunciation",
+    "category": "Language",
+    "level": "Beginner–Advanced",
+    "durationMinutes": 120,
+    "summary": "Lumeran Phonemes in an audio table for pronunciation practice and reference.",
+    "hero": "https://unsplash.com/photos/a-multicolored-image-of-a-number-of-zodiac-signs-dRhR8M9P-24",
+    "modules": [
+      {
+        "id": "vowels",
+        "title": "Vowels",
+        "lessons": [
+          {
+            "id": "vowels-chart",
+            "title": "Vowel Chart",
+            "contentHTML": "<table>\n  <tr>romanised symbol<th>Audio</th></tr>\n  <tr><td>a</td><audio controls><source src='edu/audio/a.mp3' type='audio/mp3'></audio></tr>\n  <tr><td>ä</td><audio controls><source src='edu/audio/ä.mp3' type='audio/mp3'></audio></tr>\n  </table>"
+          
+          }
+        ]
+      },
+      {
+        "id": "consonants",
+        "title": "Consonants",
+        "lessons": [
+          {
+            "id": "consonant-chart",
+            "title": "Consonant Chart",
+            "contentHTML": "<ol><li>The air feels alive.</li><li>Our hearts are strong.</li><li>The garden blooms beautifully.</li><li>I dream of a brighter world.</li><li>They speak with courage.</li><li>Life flows like a river.</li><li>The light awakens us.</li><li>Silence teaches wisdom.</li><li>The stars remember our ancestors.</li><li>We are the children of tomorrow.</li></ol>"
+          }
+        ]
+      }
+    ]
   }
 ]
