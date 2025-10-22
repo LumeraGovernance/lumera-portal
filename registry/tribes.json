@@ -42,6 +42,11 @@
       "name": "Head of State",
       "desc": "Tasked with upholding the constitution, ratifying treaties, and representing Lumera",
       "members": ["LUM0001"]
-    }
+    },
+    "EMA": {
+      "code": "EMA",
+      "name": "Etalyë Tribe",
+      "desc": "Italian Hertiage Mulatto Tribe.",
+      "members": ["LUM0004"]
   }
 }
