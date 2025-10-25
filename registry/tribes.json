@@ -48,6 +48,12 @@
       "name": "Etalyë Tribe",
       "desc": "Italian Hertiage Mulatto Tribe.",
       "members": ["LUM0004"]
+    },
+    "JOA": {
+      "code": "JOA",
+      "name": "Justice and Order Circle",
+      "desc": "Tribunals, Rulings, Interpretations.",
+      "members": ["LUM0004"]
     }
   }
 }
