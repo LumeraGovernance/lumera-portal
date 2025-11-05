@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="theme-color" content="#1a2937">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Lumera Market - Official Catalog</title>
+    <meta name="description" content="Official marketplace for Lumera citizens - connecting entrepreneurs with customers">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Custom Styles -->
+    <style>
+        /* Custom CSS Variables for Lumera Brand */
+        :root {
+            --navy-dark: #1a2937;
+            --navy-medium: #2d3e50;
+            --navy-darker: #151f2b;
+            --gold: #c9a961;
+            --cream: #f8f6f3;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--cream);
+            color: #333;
+        }
+
+        /* Typography defaults */
+        h1 { font-size: 2.25rem; font-weight: 700; line-height: 1.2; }
+        h2 { font-size: 1.875rem; font-weight: 600; line-height: 1.3; }
+        h3 { font-size: 1.5rem; font-weight: 600; line-height: 1.4; }
+        h4 { font-size: 1.25rem; font-weight: 600; line-height: 1.4; }
+        p { font-size: 1rem; line-height: 1.6; }
+
+        /* Mobile Typography */
+        @media (max-width: 640px) {
+            h1 { font-size: 1.75rem; }
+            h2 { font-size: 1.5rem; }
+            h3 { font-size: 1.25rem; }
+            h4 { font-size: 1.125rem; }
+        }
+
+        /* Smooth transitions */
+        * { transition: all 0.2s ease; }
+
+        /* Hide elements by default */
+        .page { display: none; }
+        .page.active { display: block; }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: #b08f51; }
+
+        /* Card hover effects */
+        .product-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        /* Heart animation */
+        .heart-btn.active {
+            animation: heartBeat 0.3s ease;
+        }
+        @keyframes heartBeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Star rating */
+        .star { color: #fbbf24; }
+
+        /* Loading spinner */
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--gold);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Image Gallery */
+        #mainProductImage {
+            transition: opacity 0.3s ease;
+        }
+        
+        [data-thumbnail-index] {
+            transition: border-color 0.3s ease, opacity 0.2s ease;
+        }
+        
+        [data-thumbnail-index]:hover {
+            opacity: 0.75;
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            /* Mobile filter drawer */
+            #mobileFilters {
+                position: fixed;
+                top: 0;
+                left: -100%;
+                width: 80%;
+                height: 100vh;
+                background: white;
+                z-index: 9999;
+                overflow-y: auto;
+                transition: left 0.3s ease;
+                box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            }
+            
+            #mobileFilters.open {
+                left: 0;
+            }
+            
+            /* Mobile overlay */
+            #mobileOverlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                background: rgba(0,0,0,0.5);
+                z-index: 9998;
+                display: none;
+            }
+            
+            #mobileOverlay.show {
+                display: block;
+            }
+            
+            /* Ensure product cards are touch-friendly */
+            .product-card {
+                min-height: 320px;
+            }
+            
+            /* Mobile-friendly buttons */
+            button, a {
+                min-height: 44px;
+                min-width: 44px;
+            }
+            
+            /* Adjust image gallery arrows for mobile */
+            .gallery-arrow {
+                padding: 12px !important;
+            }
+            
+            /* Mobile header adjustments */
+            .mobile-header-title {
+                font-size: 1rem;
+            }
+        }
+
+        /* Prevent body scroll when mobile menu open */
+        body.menu-open {
+            overflow: hidden;
+        }
+
+        /* Mobile filter button pulse */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .filter-badge {
+            animation: pulse 2s infinite;
+        }
+
+        /* Touch-friendly spacing */
+        @media (max-width: 640px) {
+            .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+        }
+
+        /* Touch optimizations */
+        .touch-manipulation {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button, a, input, select, textarea {
+            -webkit-tap-highlight-color: rgba(201, 169, 97, 0.2);
+        }
+
+        /* Prevent pull-to-refresh on mobile when scrolling */
+        body {
+            overscroll-behavior-y: contain;
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Fix for iOS Safari address bar */
+        @supports (-webkit-touch-callout: none) {
+            .min-h-screen {
+                min-height: -webkit-fill-available;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 w-full border-b" style="background-color: var(--navy-dark); border-color: var(--navy-medium);">
+        <!-- Top Banner -->
+        <div style="background-color: var(--navy-darker); border-bottom: 1px solid var(--navy-medium);">
+            <div class="container mx-auto px-4 py-2">
+                <p class="text-center text-sm tracking-wide" style="color: var(--gold);">
+                    Truth • Virtue • Liberty • Prosperity
+                </p>
+            </div>
+        </div>
+
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between gap-2 md:gap-4">
+                <!-- Logo -->
+                <div class="flex items-center gap-2 md:gap-3 cursor-pointer" onclick="navigateTo('home')">
+                    <img src="./public/lumera-flag.svg" alt="Lumera Flag" class="w-8 h-8 md:w-10 md:h-10 object-contain">
+                    <div>
+                        <div class="text-sm md:text-base tracking-wider" style="color: var(--gold);">LUMERA</div>
+                        <div class="text-xs tracking-widest -mt-1" style="color: var(--gold);">MARKET</div>
+                    </div>
+                </div>
+
+                <!-- Mobile: Filter + Favorites -->
+                <div class="flex items-center gap-2 lg:hidden">
+                    <!-- Mobile Filter Button -->
+                    <button 
+                        onclick="toggleMobileFilters()" 
+                        class="relative px-3 py-2 rounded-md flex items-center gap-2"
+                        style="background-color: var(--navy-medium); color: white;"
+                        id="mobileFilterBtn"
+                    >
+                        <i data-lucide="filter" class="w-5 h-5"></i>
+                        <span class="text-sm">Filters</span>
+                        <span id="activeFiltersCount" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center filter-badge">0</span>
+                    </button>
+                    
+                    <!-- Favorites Button (Mobile) -->
+                    <button 
+                        onclick="navigateTo('favorites')" 
+                        class="relative px-3 py-2 rounded-md flex items-center gap-2"
+                        style="background-color: var(--gold); color: var(--navy-dark);"
+                    >
+                        <i data-lucide="heart" class="w-5 h-5"></i>
+                        <span id="favoritesCountMobile" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
+                    </button>
+                </div>
+
+                <!-- Desktop: Search + Favorites -->
+                <div class="hidden lg:flex items-center gap-4 flex-1 justify-end">
+                    <!-- Search -->
+                    <div class="flex-1 max-w-md">
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                id="searchInput"
+                                placeholder="Search products..." 
+                                class="w-full px-4 py-2 pl-10 rounded-md border focus:outline-none focus:ring-2"
+                                style="border-color: var(--navy-medium); background-color: rgba(255,255,255,0.1); color: white;"
+                                oninput="handleSearch(this.value)"
+                            >
+                            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style="color: var(--gold);"></i>
+                        </div>
+                    </div>
+
+                    <!-- Favorites Button (Desktop) -->
+                    <button 
+                        onclick="navigateTo('favorites')" 
+                        class="relative px-4 py-2 rounded-md flex items-center gap-2"
+                        style="background-color: var(--gold); color: var(--navy-dark);"
+                    >
+                        <i data-lucide="heart" class="w-5 h-5"></i>
+                        <span>Favorites</span>
+                        <span id="favoritesCount" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mobile Search Bar (Full Width) -->
+            <div class="lg:hidden mt-3">
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        id="searchInputMobile"
+                        placeholder="Search products..." 
+                        class="w-full px-4 py-2 pl-10 rounded-md border focus:outline-none focus:ring-2"
+                        style="border-color: var(--navy-medium); background-color: rgba(255,255,255,0.1); color: white;"
+                        oninput="handleSearch(this.value)"
+                    >
+                    <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style="color: var(--gold);"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        
+        <!-- HOME PAGE -->
+        <div id="homePage" class="page active">
+            <div class="flex flex-col lg:flex-row gap-6">
+                
+                <!-- Desktop Filters Sidebar -->
+                <aside class="hidden lg:block lg:w-64 flex-shrink-0">
+                    <div class="bg-white rounded-lg shadow-md p-6 sticky top-24">
+                        <h3 class="mb-4" style="color: var(--navy-dark);">Filters</h3>
+                        
+                        <!-- Category Filter -->
+                        <div class="mb-6">
+                            <h4 class="mb-2 text-sm" style="color: var(--navy-dark);">Category</h4>
+                            <div class="space-y-2" id="categoryFilters"></div>
+                        </div>
+
+                        <!-- Price Filter -->
+                        <div class="mb-6">
+                            <h4 class="mb-2 text-sm" style="color: var(--navy-dark);">Price Range</h4>
+                            <input 
+                                type="range" 
+                                id="priceRange" 
+                                min="0" 
+                                max="1500" 
+                                value="1500" 
+                                class="w-full"
+                                oninput="handlePriceChange(this.value)"
+                            >
+                            <div class="flex justify-between text-sm mt-1">
+                                <span>$0</span>
+                                <span id="priceValue">$1500+</span>
+                            </div>
+                        </div>
+
+                        <!-- Reset Button -->
+                        <button 
+                            onclick="resetFilters()" 
+                            class="w-full py-2 px-4 rounded-md border"
+                            style="border-color: var(--gold); color: var(--gold);"
+                        >
+                            Reset Filters
+                        </button>
+                    </div>
+                </aside>
+                
+                <!-- Mobile Filter Drawer -->
+                <div id="mobileFilters" class="lg:hidden">
+                    <div class="bg-white p-6 h-full overflow-y-auto">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 style="color: var(--navy-dark);">Filters</h3>
+                            <button onclick="toggleMobileFilters()" class="p-2">
+                                <i data-lucide="x" class="w-6 h-6"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Category Filter (Mobile) -->
+                        <div class="mb-6">
+                            <h4 class="mb-3 text-sm" style="color: var(--navy-dark);">Category</h4>
+                            <div class="space-y-3" id="categoryFiltersMobile"></div>
+                        </div>
+
+                        <!-- Price Filter (Mobile) -->
+                        <div class="mb-6">
+                            <h4 class="mb-3 text-sm" style="color: var(--navy-dark);">Price Range</h4>
+                            <input 
+                                type="range" 
+                                id="priceRangeMobile" 
+                                min="0" 
+                                max="1500" 
+                                value="1500" 
+                                class="w-full"
+                                oninput="handlePriceChange(this.value)"
+                            >
+                            <div class="flex justify-between text-sm mt-2">
+                                <span>$0</span>
+                                <span id="priceValueMobile">$1500+</span>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="space-y-3 pt-4 border-t">
+                            <button 
+                                onclick="resetFilters(); toggleMobileFilters();" 
+                                class="w-full py-3 px-4 rounded-md border"
+                                style="border-color: var(--gold); color: var(--gold);"
+                            >
+                                Reset Filters
+                            </button>
+                            <button 
+                                onclick="toggleMobileFilters()" 
+                                class="w-full py-3 px-4 rounded-md text-white"
+                                style="background-color: var(--gold); color: var(--navy-dark);"
+                            >
+                                Apply Filters
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mobile Overlay -->
+                <div id="mobileOverlay" onclick="toggleMobileFilters()"></div>
+
+                <!-- Products Grid -->
+                <main class="flex-1">
+                    <div class="mb-4 md:mb-6">
+                        <h2 class="text-xl md:text-2xl lg:text-3xl" style="color: var(--navy-dark);">Discover Quality Products</h2>
+                        <p class="text-sm md:text-base text-gray-600">From verified Lumeran entrepreneurs</p>
+                    </div>
+
+                    <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
+                        <!-- Products will be inserted here -->
+                    </div>
+
+                    <!-- No Results Message -->
+                    <div id="noResults" class="text-center py-12 hidden">
+                        <i data-lucide="search-x" class="w-16 h-16 mx-auto mb-4 text-gray-400"></i>
+                        <h3 class="text-gray-600 mb-2">No products found</h3>
+                        <p class="text-gray-500">Try adjusting your filters</p>
+                    </div>
+                </main>
+            </div>
+        </div>
+
+        <!-- PRODUCT DETAIL PAGE -->
+        <div id="productDetailPage" class="page">
+            <div id="productDetail"></div>
+        </div>
+
+        <!-- FAVORITES PAGE -->
+        <div id="favoritesPage" class="page">
+            <h2 class="mb-6" style="color: var(--navy-dark);">Your Favorites</h2>
+            <div id="favoritesGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <!-- Favorite products will be inserted here -->
+            </div>
+            <div id="noFavorites" class="text-center py-12 hidden">
+                <i data-lucide="heart-off" class="w-16 h-16 mx-auto mb-4 text-gray-400"></i>
+                <h3 class="text-gray-600 mb-2">No favorites yet</h3>
+                <p class="text-gray-500">Start adding products to your favorites!</p>
+            </div>
+        </div>
+
+        <!-- SELLER PROFILE PAGE -->
+        <div id="sellerProfilePage" class="page">
+            <div id="sellerProfile"></div>
+        </div>
+
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
+
+    <!-- JavaScript -->
+    <script src="app.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+
+</body>
+</html>
