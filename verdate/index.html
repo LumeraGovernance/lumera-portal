@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verdate — versioned idea collaboration</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#000;--s1:#0a0a0a;--s2:#111;--s3:#1a1a1a;--s4:#222;
+  --b1:#2a2a2a;--b2:#3a3a3a;--b3:#555;
+  --t1:#e8e8e8;--t2:#999;--t3:#555;--t4:#333;
+  --grn:#4a9e6b;--grn2:#2a5e3f;--grn3:#162e1f;
+  --amb:#c49a3c;--amb2:#7a5e1e;--amb3:#3d2e0a;
+  --blu:#4a7fc1;--blu2:#1e3f6e;--blu3:#0e2040;
+  --pur:#8b6ec1;--pur2:#4a3578;--pur3:#201828;
+  --red:#c14a4a;--red2:#6e1e1e;--red3:#2e0808;
+  --mono:'IBM Plex Mono',monospace;
+  --disp:'Playfair Display',serif;
+  --body:'Source Serif 4',serif;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--t1);font-family:var(--mono);font-size:13px;}
+
+/* ── WAITLIST LANDING ── */
+.landing{display:none;position:fixed;inset:0;background:var(--bg);z-index:200;overflow-y:auto;flex-direction:column;align-items:center;}
+.landing.visible{display:flex;}
+.land-inner{max-width:680px;width:100%;padding:80px 32px 100px;display:flex;flex-direction:column;align-items:center;text-align:center;}
+.land-logo{font-family:var(--disp);font-style:italic;font-size:52px;color:var(--t1);letter-spacing:-2px;margin-bottom:6px;}
+.land-logo sub{font-family:var(--mono);font-size:11px;font-style:normal;color:var(--t3);letter-spacing:3px;vertical-align:middle;margin-left:4px;}
+.land-tagline{font-family:var(--body);font-size:20px;color:var(--t2);font-style:italic;line-height:1.6;margin-bottom:12px;max-width:520px;}
+.land-sub{font-size:12px;color:var(--t3);margin-bottom:48px;}
+.land-preview{width:100%;background:var(--s2);border:1px solid var(--b1);border-radius:14px;padding:20px;margin-bottom:48px;position:relative;overflow:hidden;}
+.land-blur{position:absolute;inset:0;backdrop-filter:blur(5px);background:rgba(0,0,0,0.55);z-index:1;display:flex;align-items:center;justify-content:center;}
+.land-blur-label{font-size:12px;color:var(--t3);letter-spacing:1px;}
+.land-preview-inner{opacity:0.4;}
+.land-form{display:flex;gap:10px;width:100%;max-width:440px;margin-bottom:20px;}
+.land-input{flex:1;background:var(--s2);border:1px solid var(--b2);border-radius:26px;padding:12px 20px;font-family:var(--mono);font-size:13px;color:var(--t1);outline:none;transition:border-color 0.15s;}
+.land-input:focus{border-color:var(--b3);}
+.land-input::placeholder{color:var(--t4);}
+.land-submit{padding:12px 24px;background:var(--t1);color:#000;border:none;border-radius:26px;font-family:var(--mono);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background 0.15s;}
+.land-submit:hover{background:#d0d0d0;}
+.land-social{font-size:11px;color:var(--t3);margin-bottom:56px;}
+.land-pillars{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;width:100%;margin-bottom:56px;}
+.land-pillar{background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:18px 16px;text-align:left;}
+.lp-icon{font-size:18px;margin-bottom:10px;color:var(--grn);}
+.lp-title{font-size:13px;font-weight:500;color:var(--t1);margin-bottom:6px;}
+.lp-body{font-size:11px;color:var(--t2);line-height:1.6;}
+.land-stats{display:flex;gap:40px;margin-bottom:56px;}
+.lst{text-align:center;}
+.lst-num{font-size:28px;font-weight:500;color:var(--t1);font-family:var(--disp);}
+.lst-label{font-size:10px;color:var(--t3);letter-spacing:1px;margin-top:3px;}
+.land-enter{font-size:12px;color:var(--grn);cursor:pointer;border:1px solid var(--grn2);padding:8px 20px;border-radius:20px;transition:all 0.15s;}
+.land-enter:hover{background:var(--grn3);}
+
+/* ── SHELL ── */
+.shell{display:flex;height:100vh;width:100vw;}
+.sidebar{width:240px;flex-shrink:0;border-right:1px solid var(--b1);display:flex;flex-direction:column;background:var(--bg);}
+.logo-wrap{padding:20px 20px 10px;}
+.logo{font-family:var(--disp);font-style:italic;font-size:26px;color:var(--t1);letter-spacing:-1px;cursor:pointer;}
+.logo sub{font-family:var(--mono);font-size:9px;font-style:normal;color:var(--t3);letter-spacing:2px;margin-left:3px;}
+.snav{padding:8px 0;flex:1;overflow-y:auto;}
+.si{display:flex;align-items:center;gap:12px;padding:10px 18px;font-size:14px;color:var(--t2);cursor:pointer;border-radius:28px;margin:1px 10px;transition:background 0.1s,color 0.1s;}
+.si:hover{background:var(--s3);color:var(--t1);}
+.si.active{color:var(--t1);font-weight:500;}
+.si .ico{width:20px;text-align:center;font-size:17px;flex-shrink:0;}
+.si .badge{margin-left:auto;font-size:10px;color:var(--t3);background:var(--s3);padding:1px 6px;border-radius:8px;}
+.si .badge.grn{background:var(--grn3);color:var(--grn);}
+.snav-section{padding:16px 18px 6px;font-size:10px;color:var(--t4);letter-spacing:2px;text-transform:uppercase;}
+.pub-item{display:flex;align-items:center;gap:9px;padding:7px 18px;cursor:pointer;border-radius:20px;margin:1px 10px;}
+.pub-item:hover{background:var(--s3);}
+.pub-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.pub-name{font-size:12px;color:var(--t2);}
+.pub-ver{font-size:10px;color:var(--t3);margin-left:auto;}
+.new-btn{margin:12px;padding:12px;background:var(--t1);color:#000;border:none;border-radius:26px;font-family:var(--mono);font-size:13px;font-weight:500;cursor:pointer;transition:background 0.15s;}
+.new-btn:hover{background:#d0d0d0;}
+.urow{display:flex;align-items:center;gap:10px;padding:12px;margin:6px 8px;border-radius:28px;cursor:pointer;transition:background 0.1s;}
+.urow:hover{background:var(--s3);}
+.uav{width:36px;height:36px;border-radius:50%;background:var(--s3);border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--grn);flex-shrink:0;}
+.uname{font-size:13px;color:var(--t1);font-weight:500;}
+.uhandle{font-size:11px;color:var(--t3);}
+.main{flex:1;overflow:hidden;display:flex;flex-direction:column;min-width:0;}
+
+/* ── SHARED VIEW CHROME ── */
+.view{display:none;flex-direction:column;height:100%;overflow:hidden;}
+.view.visible{display:flex;}
+.vheader{padding:14px 20px;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:12px;flex-shrink:0;background:rgba(0,0,0,0.85);}
+.vscroll{flex:1;overflow-y:auto;}
+.vscroll::-webkit-scrollbar{width:3px;}
+.vscroll::-webkit-scrollbar-thumb{background:var(--b2);}
+
+/* ── FEED ── */
+.feed-sort{display:flex;gap:0;border:1px solid var(--b1);border-radius:20px;overflow:hidden;}
+.fsort{padding:5px 14px;font-size:11px;color:var(--t3);cursor:pointer;background:transparent;border:none;font-family:var(--mono);}
+.fsort.active{background:var(--s3);color:var(--t1);}
+.feed-tabs{display:flex;border-bottom:1px solid var(--b1);flex-shrink:0;}
+.ftab{flex:1;padding:13px 0;text-align:center;font-size:12px;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;}
+.ftab.active{color:var(--t1);border-bottom-color:var(--t1);}
+.ftab:hover:not(.active){color:var(--t2);}
+.post{display:flex;gap:12px;padding:16px 20px;border-bottom:1px solid var(--b1);cursor:pointer;transition:background 0.1s;}
+.post:hover{background:var(--s2);}
+.av-col{display:flex;flex-direction:column;align-items:center;flex-shrink:0;}
+.av{width:40px;height:40px;border-radius:50%;background:var(--s3);border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;}
+.thread-line{width:2px;background:var(--b2);margin-top:6px;flex:1;min-height:20px;border-radius:1px;}
+.pmain{flex:1;min-width:0;}
+.phead{display:flex;align-items:baseline;gap:6px;margin-bottom:4px;flex-wrap:wrap;}
+.pname{font-size:14px;font-weight:500;color:var(--t1);}
+.phandle{font-size:12px;color:var(--t3);}
+.ptime{font-size:11px;color:var(--t3);margin-left:auto;}
+.ptitle{font-family:var(--disp);font-size:19px;color:var(--t1);line-height:1.25;margin:5px 0 6px;font-weight:700;}
+.pdeck{font-family:var(--body);font-size:13px;color:var(--t2);line-height:1.55;font-style:italic;margin-bottom:12px;}
+.branch-box{background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:11px 13px;margin-bottom:12px;transition:border-color 0.15s;}
+.branch-box:hover{border-color:var(--b2);}
+.bb-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;}
+.bb-label{font-size:9px;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase;}
+.bb-cur{font-size:10px;color:var(--grn);}
+.bb-svg{width:100%;overflow-x:auto;}
+.ptags{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:9px;}
+.tag{font-size:10px;padding:2px 8px;border:1px solid var(--b2);border-radius:10px;color:var(--t3);}
+.tag.g{border-color:var(--grn2);color:var(--grn);}
+.tag.a{border-color:var(--amb2);color:var(--amb);}
+.tag.p{border-color:var(--pur2);color:var(--pur);}
+.pacts{display:flex;gap:2px;}
+.pa{display:flex;align-items:center;gap:4px;padding:6px 12px 6px 0;font-size:11px;color:var(--t3);cursor:pointer;transition:color 0.1s;}
+.pa:hover{color:var(--t1);}
+
+/* ── ARTICLE ── */
+.art-topbar{padding:12px 24px;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:14px;flex-shrink:0;background:rgba(0,0,0,0.85);}
+.back{font-size:12px;color:var(--t2);cursor:pointer;padding:6px 14px;border:1px solid var(--b2);border-radius:20px;transition:all 0.1s;flex-shrink:0;}
+.back:hover{color:var(--t1);border-color:var(--b3);}
+.art-breadcrumb{font-size:11px;color:var(--t3);}
+.art-scroll{flex:1;overflow-y:auto;display:flex;justify-content:center;}
+.art-scroll::-webkit-scrollbar{width:4px;}
+.art-scroll::-webkit-scrollbar-thumb{background:var(--b2);}
+.art-inner{max-width:680px;width:100%;padding:32px 28px 80px;}
+.art-ver-box{background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:13px 15px;margin-bottom:28px;}
+.avb-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.avb-label{font-size:9px;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase;}
+.avb-cur{font-size:11px;color:var(--grn);}
+.avb-hint{font-size:10px;color:var(--t3);margin-top:8px;text-align:center;}
+.fork-note{background:var(--amb3);border:1px solid var(--amb2);border-radius:7px;padding:9px 13px;margin-bottom:20px;font-size:11px;color:var(--amb);display:none;}
+.art-kicker{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--grn);margin-bottom:12px;}
+.art-title{font-family:var(--disp);font-size:32px;color:var(--t1);line-height:1.18;margin-bottom:12px;font-weight:700;}
+.art-deck{font-family:var(--body);font-size:17px;color:var(--t2);font-style:italic;line-height:1.65;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--b1);}
+.art-byline{display:flex;align-items:center;gap:12px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--b1);}
+.art-av-lg{width:40px;height:40px;border-radius:50%;background:var(--s3);border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;font-size:11px;}
+.art-byname{font-size:14px;color:var(--t1);font-weight:500;}
+.art-bymeta{font-size:11px;color:var(--t3);margin-top:2px;}
+.art-body p{font-family:var(--body);font-size:16px;color:var(--t2);line-height:1.9;margin-bottom:20px;}
+.art-body p.lede{font-size:19px;color:var(--t1);font-weight:600;}
+.art-body p.muted{color:var(--t3);font-style:italic;}
+.art-actions{display:flex;gap:8px;padding-top:24px;border-top:1px solid var(--b1);margin-top:28px;flex-wrap:wrap;}
+.abtn{padding:8px 18px;border:1px solid var(--b2);border-radius:20px;font-family:var(--mono);font-size:12px;color:var(--t2);background:transparent;cursor:pointer;transition:all 0.1s;}
+.abtn:hover{color:var(--t1);border-color:var(--b3);}
+.abtn.fork-btn{background:var(--amb3);color:var(--amb);border-color:var(--amb2);}
+.abtn.fork-btn:hover{background:var(--amb2);}
+.abtn.merge-btn{background:var(--blu3);color:var(--blu);border-color:var(--blu2);}
+.abtn.merge-btn:hover{background:var(--blu2);}
+
+/* ── EXPLORE ── */
+.search-bar{flex:1;background:var(--s2);border:1px solid var(--b1);border-radius:22px;padding:9px 16px;font-family:var(--mono);font-size:13px;color:var(--t1);outline:none;transition:border-color 0.15s;}
+.search-bar:focus{border-color:var(--b3);}
+.search-bar::placeholder{color:var(--t4);}
+.explore-section{padding:20px 20px 0;font-size:10px;color:var(--t3);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;}
+.topic-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px 20px;}
+.topic-card{background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px;cursor:pointer;transition:border-color 0.15s,background 0.1s;}
+.topic-card:hover{background:var(--s3);border-color:var(--b2);}
+.tc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.tc-name{font-size:14px;font-weight:500;color:var(--t1);}
+.tc-count{font-size:10px;color:var(--t3);}
+.tc-desc{font-size:11px;color:var(--t2);line-height:1.5;margin-bottom:10px;}
+.tc-authors{display:flex;gap:4px;}
+.tc-av{width:22px;height:22px;border-radius:50%;border:1px solid var(--b2);background:var(--s3);display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--t2);}
+.suggested-head{padding:20px 20px 12px;font-size:10px;color:var(--t3);letter-spacing:2px;text-transform:uppercase;}
+.suggested-item{display:flex;align-items:center;gap:12px;padding:11px 20px;cursor:pointer;transition:background 0.1s;border-bottom:1px solid var(--b1);}
+.suggested-item:hover{background:var(--s2);}
+.si-av{width:36px;height:36px;border-radius:50%;background:var(--s3);border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;}
+.si-name{font-size:13px;font-weight:500;color:var(--t1);}
+.si-handle{font-size:11px;color:var(--t3);}
+.si-meta{font-size:11px;color:var(--t3);margin-left:auto;text-align:right;}
+.follow-btn{padding:5px 14px;border:1px solid var(--b2);border-radius:14px;font-family:var(--mono);font-size:11px;color:var(--t2);background:transparent;cursor:pointer;margin-left:8px;transition:all 0.1s;flex-shrink:0;}
+.follow-btn:hover{color:var(--t1);border-color:var(--b3);}
+.follow-btn.following{background:var(--s3);color:var(--grn);border-color:var(--grn2);}
+
+/* ── NOTIFICATIONS ── */
+.notif-filter{display:flex;gap:0;border:1px solid var(--b1);border-radius:20px;overflow:hidden;}
+.nf{padding:5px 14px;font-size:11px;color:var(--t3);cursor:pointer;background:transparent;border:none;font-family:var(--mono);transition:all 0.1s;}
+.nf.active{background:var(--s3);color:var(--t1);}
+.notif{display:flex;gap:12px;padding:14px 20px;border-bottom:1px solid var(--b1);cursor:pointer;transition:background 0.1s;}
+.notif:hover{background:var(--s2);}
+.notif.unread{background:var(--s1);}
+.notif.unread::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--grn);flex-shrink:0;margin-top:8px;}
+.notif-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.notif-body{flex:1;min-width:0;}
+.notif-text{font-size:13px;color:var(--t2);line-height:1.5;margin-bottom:4px;}
+.notif-text strong{color:var(--t1);}
+.notif-meta{font-size:11px;color:var(--t4);}
+.notif-preview{font-family:var(--body);font-size:12px;color:var(--t3);font-style:italic;margin-top:6px;padding:8px 10px;background:var(--s2);border-radius:6px;border-left:2px solid var(--b2);}
+
+/* ── PROFILE ── */
+.profile-header{padding:28px 24px 0;border-bottom:1px solid var(--b1);}
+.profile-top{display:flex;gap:16px;align-items:flex-start;margin-bottom:20px;}
+.profile-av{width:72px;height:72px;border-radius:50%;background:var(--s3);border:2px solid var(--b2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;color:var(--grn);}
+.profile-info{flex:1;}
+.profile-name{font-family:var(--disp);font-size:24px;color:var(--t1);font-weight:700;margin-bottom:3px;}
+.profile-handle{font-size:13px;color:var(--t3);margin-bottom:8px;}
+.profile-bio{font-family:var(--body);font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:10px;font-style:italic;}
+.profile-links{display:flex;gap:14px;font-size:11px;color:var(--t3);}
+.profile-link{color:var(--blu);cursor:pointer;}
+.profile-btns{display:flex;gap:8px;margin-top:auto;}
+.edit-btn{padding:7px 18px;border:1px solid var(--b2);border-radius:20px;font-family:var(--mono);font-size:12px;color:var(--t2);background:transparent;cursor:pointer;transition:all 0.1s;}
+.edit-btn:hover{color:var(--t1);border-color:var(--b3);}
+.profile-stats{display:flex;gap:0;margin-bottom:16px;}
+.pstat{padding:0 20px 0 0;text-align:left;cursor:pointer;}
+.pstat:hover .pstat-label{color:var(--t2);}
+.pstat-num{font-size:18px;font-weight:500;color:var(--t1);}
+.pstat-label{font-size:11px;color:var(--t3);margin-top:1px;transition:color 0.1s;}
+.profile-tabs{display:flex;}
+.ptab{padding:12px 20px;font-size:12px;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;}
+.ptab.active{color:var(--t1);border-bottom-color:var(--t1);}
+.ptab:hover:not(.active){color:var(--t2);}
+.branch-score-banner{margin:20px;background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:16px 18px;display:flex;align-items:center;gap:16px;}
+.bs-score{font-size:36px;font-weight:500;color:var(--grn);font-family:var(--disp);}
+.bs-label{font-size:10px;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px;}
+.bs-desc{font-size:12px;color:var(--t2);line-height:1.5;}
+.bs-bar-wrap{flex:1;}
+.bs-bar{height:4px;background:var(--b1);border-radius:2px;margin-top:8px;overflow:hidden;}
+.bs-bar-fill{height:100%;background:linear-gradient(to right,var(--grn2),var(--grn));border-radius:2px;}
+.coauth-section{padding:16px 20px;border-bottom:1px solid var(--b1);}
+.coauth-title{font-size:10px;color:var(--t3);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;}
+.coauth-list{display:flex;gap:8px;flex-wrap:wrap;}
+.coauth-chip{display:flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;background:var(--s2);border:1px solid var(--b1);border-radius:16px;cursor:pointer;transition:border-color 0.1s;}
+.coauth-chip:hover{border-color:var(--b2);}
+.coauth-av{width:22px;height:22px;border-radius:50%;background:var(--s3);display:flex;align-items:center;justify-content:center;font-size:8px;}
+.coauth-name{font-size:11px;color:var(--t2);}
+.coauth-count{font-size:10px;color:var(--t3);}
+
+/* ── WRITE / EDITOR ── */
+.editor-bar{display:flex;align-items:center;gap:10px;}
+.editor-status{font-size:11px;color:var(--t3);}
+.editor-pub-btn{padding:7px 20px;background:var(--grn);color:#000;border:none;border-radius:20px;font-family:var(--mono);font-size:12px;font-weight:500;cursor:pointer;transition:background 0.15s;}
+.editor-pub-btn:hover{background:#3a8e5b;}
+.editor-wrap{display:flex;flex:1;overflow:hidden;}
+.editor-main{flex:1;overflow-y:auto;display:flex;justify-content:center;}
+.editor-main::-webkit-scrollbar{width:4px;}
+.editor-main::-webkit-scrollbar-thumb{background:var(--b2);}
+.editor-inner{max-width:680px;width:100%;padding:32px 28px 80px;}
+.editor-meta{margin-bottom:20px;display:flex;flex-direction:column;gap:10px;}
+.editor-field{background:transparent;border:none;border-bottom:1px solid var(--b1);padding:8px 0;font-family:var(--mono);font-size:11px;color:var(--t2);outline:none;width:100%;transition:border-color 0.15s;}
+.editor-field:focus{border-color:var(--b2);}
+.editor-field::placeholder{color:var(--t4);}
+.editor-title-field{font-family:var(--disp);font-size:32px;color:var(--t1);font-weight:700;background:transparent;border:none;outline:none;width:100%;line-height:1.2;margin-bottom:12px;}
+.editor-title-field::placeholder{color:var(--t4);}
+.editor-deck-field{font-family:var(--body);font-size:17px;color:var(--t2);font-style:italic;background:transparent;border:none;outline:none;width:100%;line-height:1.65;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--b1);}
+.editor-deck-field::placeholder{color:var(--t4);}
+.editor-body-field{font-family:var(--body);font-size:16px;color:var(--t2);line-height:1.9;background:transparent;border:none;outline:none;width:100%;min-height:300px;resize:none;}
+.editor-body-field::placeholder{color:var(--t4);}
+.editor-toolbar{display:flex;gap:0;padding:0;border-bottom:1px solid var(--b1);flex-shrink:0;background:var(--s1);}
+.etb{padding:10px 14px;font-size:12px;color:var(--t3);cursor:pointer;border:none;background:transparent;font-family:var(--mono);transition:color 0.1s;}
+.etb:hover{color:var(--t1);}
+.etb.sep{border-right:1px solid var(--b1);}
+.editor-sidebar{width:220px;border-left:1px solid var(--b1);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0;}
+.editor-panel{padding:16px;}
+.ep-title{font-size:9px;color:var(--t3);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
+.ep-field{background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:8px 10px;font-family:var(--mono);font-size:11px;color:var(--t1);outline:none;width:100%;margin-bottom:8px;transition:border-color 0.15s;}
+.ep-field:focus{border-color:var(--b2);}
+.ep-field::placeholder{color:var(--t4);}
+.ep-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;}
+.ep-tag{font-size:10px;padding:2px 8px;border:1px solid var(--b2);border-radius:10px;color:var(--t3);cursor:pointer;transition:all 0.1s;}
+.ep-tag:hover{border-color:var(--b3);color:var(--t2);}
+.ep-tag.sel{border-color:var(--grn2);color:var(--grn);background:var(--grn3);}
+.ep-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.ep-label{font-size:11px;color:var(--t3);}
+.ep-toggle{width:32px;height:18px;background:var(--s3);border:1px solid var(--b2);border-radius:9px;cursor:pointer;position:relative;transition:background 0.15s;}
+.ep-toggle.on{background:var(--grn2);border-color:var(--grn2);}
+.ep-toggle::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--t3);transition:all 0.15s;}
+.ep-toggle.on::after{left:16px;background:var(--grn);}
+.ep-divider{height:1px;background:var(--b1);margin:12px 0;}
+.fork-from-box{background:var(--amb3);border:1px solid var(--amb2);border-radius:8px;padding:12px;margin-bottom:12px;}
+.ffb-label{font-size:9px;color:var(--amb2);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px;}
+.ffb-title{font-size:12px;color:var(--amb);line-height:1.4;margin-bottom:4px;}
+.ffb-meta{font-size:10px;color:var(--amb2);}
+
+/* ── BRANCH MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:100;align-items:center;justify-content:center;}
+.modal-overlay.visible{display:flex;}
+.modal{background:var(--s2);border:1px solid var(--b2);border-radius:14px;width:540px;max-width:90vw;max-height:80vh;overflow-y:auto;padding:28px;}
+.modal-title{font-family:var(--disp);font-size:20px;color:var(--t1);margin-bottom:6px;font-weight:700;}
+.modal-sub{font-size:12px;color:var(--t3);margin-bottom:20px;}
+.modal-source{background:var(--s3);border:1px solid var(--b1);border-radius:8px;padding:12px 14px;margin-bottom:20px;}
+.ms-label{font-size:9px;color:var(--t3);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px;}
+.ms-title{font-size:14px;color:var(--t1);font-weight:500;margin-bottom:3px;}
+.ms-meta{font-size:11px;color:var(--t3);}
+.modal-field{width:100%;background:var(--s3);border:1px solid var(--b1);border-radius:8px;padding:10px 12px;font-family:var(--mono);font-size:12px;color:var(--t1);outline:none;margin-bottom:12px;transition:border-color 0.15s;}
+.modal-field:focus{border-color:var(--b2);}
+.modal-field::placeholder{color:var(--t4);}
+.modal-textarea{min-height:80px;resize:vertical;}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+.modal-cancel{padding:9px 20px;border:1px solid var(--b2);border-radius:20px;font-family:var(--mono);font-size:12px;color:var(--t2);background:transparent;cursor:pointer;transition:all 0.1s;}
+.modal-cancel:hover{color:var(--t1);}
+.modal-confirm{padding:9px 20px;background:var(--amb);color:#000;border:none;border-radius:20px;font-family:var(--mono);font-size:12px;font-weight:500;cursor:pointer;transition:background 0.15s;}
+.modal-confirm:hover{background:#d4aa3c;}
+
+/* ── MERGE MODAL ── */
+.merge-modal-confirm{background:var(--blu);color:#fff;}
+.merge-modal-confirm:hover{background:#5a8fd4;}
+
+/* ── TOOLTIP ── */
+.tooltip{position:fixed;background:var(--s4);border:1px solid var(--b2);border-radius:6px;padding:5px 9px;font-size:10px;color:var(--t1);pointer-events:none;white-space:nowrap;z-index:1000;opacity:0;transition:opacity 0.12s;}
+.tooltip.show{opacity:1;}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<div id="tooltip" class="tooltip"></div>
+
+<!-- ══ WAITLIST LANDING ══ -->
+<div class="landing visible" id="landing">
+  <div class="land-inner">
+    <div class="land-logo">verdate<sub>beta</sub></div>
+    <div class="land-tagline">The version control system for ideas.<br>Every article evolves in public.</div>
+    <div class="land-sub">Join 12,847 writers, researchers, and thinkers on the waitlist.</div>
+
+    <div class="land-preview">
+      <div class="land-preview-inner">
+        <div style="font-size:10px;color:var(--t3);letter-spacing:1.5px;margin-bottom:10px;text-transform:uppercase;">branch tree — click any node</div>
+        <svg width="100%" height="80" viewBox="0 0 500 80" style="display:block;">
+          <line x1="20" y1="36" x2="480" y2="36" stroke="#2a2a2a" stroke-width="2.5"/>
+          <line x1="160" y1="36" x2="220" y2="64" stroke="#7a5e1e" stroke-width="1.5" stroke-dasharray="5,3"/>
+          <line x1="220" y1="64" x2="380" y2="64" stroke="#7a5e1e" stroke-width="1.5"/>
+          <line x1="280" y1="36" x2="330" y2="10" stroke="#2a5e3f" stroke-width="1.5" stroke-dasharray="5,3"/>
+          <line x1="330" y1="10" x2="430" y2="10" stroke="#2a5e3f" stroke-width="1.5"/>
+          <circle cx="40" cy="36" r="7" fill="#162e1f" stroke="#4a9e6b" stroke-width="2"/>
+          <circle cx="120" cy="36" r="7" fill="#162e1f" stroke="#4a9e6b" stroke-width="2"/>
+          <circle cx="200" cy="36" r="7" fill="#3d2e0a" stroke="#c49a3c" stroke-width="2"/>
+          <circle cx="280" cy="36" r="7" fill="#0e2040" stroke="#4a7fc1" stroke-width="2"/>
+          <circle cx="360" cy="36" r="7" fill="#162e1f" stroke="#4a9e6b" stroke-width="2"/>
+          <circle cx="460" cy="36" r="9" fill="#4a9e6b" stroke="#4a9e6b" stroke-width="2.5"/>
+          <circle cx="300" cy="64" r="7" fill="#3d2e0a" stroke="#c49a3c" stroke-width="2"/>
+          <circle cx="370" cy="64" r="7" fill="#3d2e0a" stroke="#c49a3c" stroke-width="2"/>
+          <circle cx="350" cy="10" r="6" fill="#162e1f" stroke="#4a9e6b" stroke-width="1.5"/>
+          <circle cx="420" cy="10" r="6" fill="#162e1f" stroke="#4a9e6b" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <div class="land-blur"><span class="land-blur-label">join the waitlist to access</span></div>
+    </div>
+
+    <div class="land-form">
+      <input class="land-input" placeholder="your@email.com" id="waitlist-email">
+      <button class="land-submit" onclick="joinWaitlist()">Join waitlist</button>
+    </div>
+    <div class="land-social" id="waitlist-confirm" style="display:none;color:var(--grn);">You're on the list — we'll be in touch.</div>
+    <div class="land-social">Already 12,847 people waiting · No spam · Unsubscribe anytime</div>
+
+    <div class="land-pillars">
+      <div class="land-pillar">
+        <div class="lp-icon">⑂</div>
+        <div class="lp-title">Branch any idea</div>
+        <div class="lp-body">Every article can be branched — producing your own version that lives in the original's tree, credited back to the source.</div>
+      </div>
+      <div class="land-pillar">
+        <div class="lp-icon">↰</div>
+        <div class="lp-title">Merge the best thinking</div>
+        <div class="lp-body">Authors accept merge requests, incorporating branches back into the main article. Co-authorship is attributed permanently.</div>
+      </div>
+      <div class="land-pillar">
+        <div class="lp-icon">◎</div>
+        <div class="lp-title">Trace every evolution</div>
+        <div class="lp-body">Every idea has a full version history. The intellectual genealogy of every article is public and permanent.</div>
+      </div>
+    </div>
+
+    <div class="land-stats">
+      <div class="lst"><div class="lst-num">12,847</div><div class="lst-label">On waitlist</div></div>
+      <div class="lst"><div class="lst-num">480k</div><div class="lst-label">Year 3 target</div></div>
+      <div class="lst"><div class="lst-num">9</div><div class="lst-label">High-fit niches</div></div>
+    </div>
+
+    <div class="land-enter" onclick="enterApp()">Preview the platform →</div>
+  </div>
+</div>
+
+<!-- ══ BRANCH MODAL ══ -->
+<div class="modal-overlay" id="branch-modal">
+  <div class="modal">
+    <div class="modal-title">Branch this article</div>
+    <div class="modal-sub">Your branch lives in the original's tree. All contributions are publicly attributed.</div>
+    <div class="modal-source">
+      <div class="ms-label">Branching from</div>
+      <div class="ms-title" id="bm-title">—</div>
+      <div class="ms-meta" id="bm-meta">—</div>
+    </div>
+    <input class="modal-field" placeholder="Your branch title" id="bm-new-title">
+    <textarea class="modal-field modal-textarea" placeholder="What angle are you taking? What does this branch add?"></textarea>
+    <input class="modal-field" placeholder="Tags (comma separated)">
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeBranchModal()">Cancel</button>
+      <button class="modal-confirm" onclick="confirmBranch()">Create branch ⑂</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MERGE MODAL ══ -->
+<div class="modal-overlay" id="merge-modal">
+  <div class="modal">
+    <div class="modal-title">Request a merge</div>
+    <div class="modal-sub">Propose that your branch be incorporated into the original article. The author decides.</div>
+    <div class="modal-source">
+      <div class="ms-label">Merging into</div>
+      <div class="ms-title" id="mm-title">—</div>
+      <div class="ms-meta" id="mm-meta">—</div>
+    </div>
+    <textarea class="modal-field modal-textarea" placeholder="What does your branch contribute? Why should it be merged?"></textarea>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeMergeModal()">Cancel</button>
+      <button class="modal-confirm merge-modal-confirm" onclick="confirmMerge()">Send merge request ↰</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MAIN APP ══ -->
+<div class="shell" id="app" style="display:none;">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="logo-wrap">
+      <div class="logo" onclick="showView('feed')">verdate<sub>beta</sub></div>
+    </div>
+    <div class="snav">
+      <div class="si active" id="nav-feed" onclick="showView('feed')"><span class="ico">⌂</span> Home</div>
+      <div class="si" id="nav-explore" onclick="showView('explore')"><span class="ico">⊕</span> Explore</div>
+      <div class="si" id="nav-forks" onclick="showView('forks')"><span class="ico">⑂</span> Branches <span class="badge grn">3</span></div>
+      <div class="si" id="nav-notif" onclick="showView('notif')"><span class="ico">◉</span> Notifications <span class="badge grn">5</span></div>
+      <div class="si" id="nav-profile" onclick="showView('profile')"><span class="ico">◈</span> Profile</div>
+      <div class="snav-section">Publications</div>
+      <div class="pub-item"><div class="pub-dot" style="background:var(--grn)"></div><div class="pub-name">The Long Form</div><div class="pub-ver">maya_r</div></div>
+      <div class="pub-item"><div class="pub-dot" style="background:var(--blu)"></div><div class="pub-name">Systems &amp; Society</div><div class="pub-ver">a_sharma</div></div>
+      <div class="pub-item"><div class="pub-dot" style="background:var(--pur)"></div><div class="pub-name">Machine Cognition</div><div class="pub-ver">t_nakamura</div></div>
+      <div class="pub-item"><div class="pub-dot" style="background:var(--amb)"></div><div class="pub-name">Urban Futures</div><div class="pub-ver">j_chen</div></div>
+    </div>
+    <button class="new-btn" onclick="showWrite()">+ New Article</button>
+    <div class="urow" onclick="showView('profile')">
+      <div class="uav">AT</div>
+      <div><div class="uname">Amazaatan T.</div><div class="uhandle">@amazaatan</div></div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- ── FEED VIEW ── -->
+    <div class="view visible" id="view-feed">
+      <div class="vheader">
+        <div style="font-size:16px;font-weight:500;color:var(--t1);flex:1;">Home</div>
+        <div class="feed-sort">
+          <button class="fsort active" onclick="setSortActive(this)">Recent</button>
+          <button class="fsort" onclick="setSortActive(this)">Trending</button>
+          <button class="fsort" onclick="setSortActive(this)">Most branched</button>
+        </div>
+      </div>
+      <div class="feed-tabs">
+        <div class="ftab active" onclick="setTabActive(this)">For you</div>
+        <div class="ftab" onclick="setTabActive(this)">Following</div>
+        <div class="ftab" onclick="setTabActive(this)">Trending</div>
+      </div>
+      <div class="vscroll">
+        <!-- Post 1 -->
+        <div class="post" onclick="openArticle('main1')">
+          <div class="av-col"><div class="av" style="color:var(--grn)">MR</div><div class="thread-line"></div></div>
+          <div class="pmain">
+            <div class="phead"><span class="pname">maya_r</span><span class="phandle">@maya_rodriguez</span><span class="ptime">2h</span></div>
+            <div class="ptitle">The case for deliberately slow cities</div>
+            <div class="pdeck">What if urban friction is not a problem to be solved, but a resource to be cultivated?</div>
+            <div class="branch-box" onclick="event.stopPropagation()">
+              <div class="bb-top"><span class="bb-label">branch tree — click any node</span><span class="bb-cur">v2.3 current</span></div>
+              <div class="bb-svg">
+                <svg width="500" height="115" style="display:block;cursor:default;">
+                  <line x1="28" y1="44" x2="474" y2="44" stroke="#2a2a2a" stroke-width="2.5"/>
+                  <line x1="168" y1="44" x2="230" y2="80" stroke="#7a5e1e" stroke-width="1.5" stroke-dasharray="5,3"/>
+                  <line x1="230" y1="80" x2="388" y2="80" stroke="#7a5e1e" stroke-width="1.5"/>
+                  <line x1="288" y1="44" x2="338" y2="12" stroke="#2a5e3f" stroke-width="1.5" stroke-dasharray="5,3"/>
+                  <line x1="338" y1="12" x2="434" y2="12" stroke="#2a5e3f" stroke-width="1.5"/>
+                  <circle data-tip="v1.0 · initial · maya_r" cx="48" cy="44" r="7" fill="#162e1f" stroke="#4a9e6b" stroke-width="2" style="cursor:pointer" onclick="openArticle('v1')"/>
+                  <circle data-tip="v2.0 · friction as design variable" cx="128" cy="44" r="7" fill="#162e1f" stroke="#4a9e6b" stroke-width="2" style="cursor:pointer" onclick="openArticle('v2')"/>
+                  <circle data-tip="fork point — j_chen branches here" cx="168" cy="44" r="7" fill="#3d2e0a" stroke="#c49a3c" stroke-width="2" style="cursor:pointer"/>
+                  <circle data-tip="merge — k_obi data → v2.1" cx="288" cy="44" r="7" fill="#0e2040" stroke="#4a7fc1" stroke-width="2" style="cursor:pointer" onclick="openArticle('merge_kobi')"/>
+                  <circle data-tip="v2.2 · intro revised" cx="370" cy="44" r="7" fill="#162e1f" stroke="#4a9e6b" stroke-width="2" style="cursor:pointer"/>
+                  <circle data-tip="v2.3 · current" cx="454" cy="44" r="9" fill="#4a9e6b" stroke="#4a9e6b" stroke-width="2.5" style="cursor:pointer" onclick="openArticle('main1')"/>
+                  <circle data-tip="j_chen · dual-speed theory" cx="308" cy="80" r="7" fill="#3d2e0a" stroke="#c49a3c" stroke-width="2" style="cursor:pointer" onclick="openArticle('fork_jchen')"/>
+                  <circle data-tip="j_chen · latest" cx="378" cy="80" r="7" fill="#3d2e0a" stroke="#c49a3c" stroke-width="2" style="cursor:pointer" onclick="openArticle('fork_jchen')"/>
+                  <circle data-tip="p_west · equity critique" cx="352" cy="12" r="6" fill="#162e1f" stroke="#4a9e6b" stroke-width="1.5" style="cursor:pointer" onclick="openArticle('fork_pwest')"/>
+                  <circle data-tip="p_west · latest" cx="424" cy="12" r="6" fill="#4a9e6b" stroke="#4a9e6b" stroke-width="1.5" style="cursor:pointer" onclick="openArticle('fork_pwest')"/>
+                  <text x="48" y="60" text-anchor="middle" fill="#555" font-size="9" font-family="IBM Plex Mono">v1.0</text>
+                  <text x="128" y="60" text-anchor="middle" fill="#555" font-size="9" font-family="IBM Plex Mono">v2.0</text>
+                  <text x="454" y="60" text-anchor="middle" fill="#162e1f" font-size="9" font-family="IBM Plex Mono" font-weight="500">v2.3●</text>
+                  <circle cx="28" cy="108" r="4" fill="#4a9e6b"/><text x="37" y="112" fill="#444" font-size="9" font-family="IBM Plex Mono">commit</text>
+                  <circle cx="92" cy="108" r="4" fill="#3d2e0a" stroke="#c49a3c" stroke-width="1.5"/><text x="101" y="112" fill="#444" font-size="9" font-family="IBM Plex Mono">branch</text>
+                  <circle cx="155" cy="108" r="4" fill="#0e2040" stroke="#4a7fc1" stroke-width="1.5"/><text x="164" y="112" fill="#444" font-size="9" font-family="IBM Plex Mono">merge</text>
+                </svg>
+              </div>
+            </div>
+            <div class="ptags"><span class="tag g">urbanism</span><span class="tag">complexity</span><span class="tag a">policy</span><span class="tag">12 min</span></div>
+            <div class="pacts"><div class="pa">◻ 14</div><div class="pa">⑂ 11 branches</div><div class="pa">◇ 48</div><div class="pa">↰ 6 merges</div></div>
+          </div>
+        </div>
+        <!-- Post 2 -->
+        <div class="post" onclick="openArticle('main2')">
+          <div class="av-col"><div class="av" style="color:var(--blu)">AS</div><div class="thread-line"></div></div>
+          <div class="pmain">
+            <div class="phead"><span class="pname">a_sharma</span><span class="phandle">@arjun_sharma</span><span class="ptime">6h</span></div>
+            <div class="ptitle">Abundance is a coordination problem, not a production problem</div>
+            <div class="pdeck">We already produce enough. The constraint is always institutional topology, never output.</div>
+            <div class="branch-box" onclick="event.stopPropagation()">
+              <div class="bb-top"><span class="bb-label">branch tree</span><span class="bb-cur">v4.0 current</span></div>
+              <div class="bb-svg">
+                <svg width="420" height="80" style="display:block;">
+                  <line x1="20" y1="40" x2="400" y2="40" stroke="#2a2a2a" stroke-width="2.5"/>
+                  <line x1="120" y1="40" x2="170" y2="65" stroke="#7a5e1e" stroke-width="1.5" stroke-dasharray="5,3"/>
+                  <line x1="170" y1="65" x2="340" y2="65" stroke="#7a5e1e" stroke-width="1.5"/>
+                  <line x1="200" y1="40" x2="250" y2="16" stroke="#4a3578" stroke-width="1.5" stroke-dasharray="5,3"/>
+                  <line x1="250" y1="16" x2="360" y2="16" stroke="#4a3578" stroke-width="1.5"/>
+                  <circle cx="40" cy="40" r="7" fill="#162e1f" stroke="#4a9e6b" stroke-width="2" style="cursor:pointer"/>
+                  <circle cx="120" cy="40" r="7" fill="#3d2e0a" stroke="#c49a3c" stroke-width="2" style="cursor:pointer" onclick="openArticle('fork_a2_1')"/>
+                  <circle cx="200" cy="40" r="7" fill="#201828" stroke="#8b6ec1" stroke-width="2" style="cursor:pointer" onclick="openArticle('fork_a2_2')"/>
+                  <circle cx="300" cy="40" r="7" fill="#0e2040" stroke="#4a7fc1" stroke-width="2" style="cursor:pointer"/>
+                  <circle cx="380" cy="40" r="9" fill="#4a9e6b" stroke="#4a9e6b" stroke-width="2.5" style="cursor:pointer" onclick="openArticle('main2')"/>
+                  <circle cx="260" cy="65" r="6" fill="#3d2e0a" stroke="#c49a3c" stroke-width="1.5" style="cursor:pointer" onclick="openArticle('fork_a2_1')"/>
+                  <circle cx="330" cy="65" r="6" fill="#c49a3c" stroke="#c49a3c" stroke-width="1.5" style="cursor:pointer" onclick="openArticle('fork_a2_1')"/>
+                  <circle cx="270" cy="16" r="6" fill="#201828" stroke="#8b6ec1" stroke-width="1.5" style="cursor:pointer" onclick="openArticle('fork_a2_2')"/>
+                  <circle cx="350" cy="16" r="6" fill="#8b6ec1" stroke="#8b6ec1" stroke-width="1.5" style="cursor:pointer" onclick="openArticle('fork_a2_2')"/>
+                </svg>
+              </div>
+            </div>
+            <div class="ptags"><span class="tag g">economics</span><span class="tag">institutions</span><span class="tag p">political economy</span><span class="tag">18 min</span></div>
+            <div class="pacts"><div class="pa">◻ 28</div><div class="pa">⑂ 7 branches</div><div class="pa">◇ 92</div><div class="pa">↰ 3 merges</div></div>
+          </div>
+        </div>
+        <!-- Post 3 — no branches yet -->
+        <div class="post" onclick="openArticle('new1')">
+          <div class="av-col"><div class="av" style="color:var(--pur)">TN</div></div>
+          <div class="pmain">
+            <div class="phead"><span class="pname">t_nakamura</span><span class="phandle">@takeshi_n</span><span class="ptime">14h</span></div>
+            <div class="ptitle">Attention is the last scarce resource</div>
+            <div class="pdeck">Every model of mind in the twentieth century was built around memory. We built the wrong thing.</div>
+            <div class="ptags"><span class="tag g">cognitive science</span><span class="tag">AI</span><span class="tag">12 min</span></div>
+            <div class="pacts"><div class="pa">◻ 6</div><div class="pa">⑂ 0 branches</div><div class="pa">◇ 31</div><div class="pa">↰ 0 merges</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ARTICLE VIEW ── -->
+    <div class="view" id="view-article">
+      <div class="art-topbar">
+        <div class="back" onclick="showView('feed')">← Back</div>
+        <div class="art-breadcrumb" id="art-breadcrumb"></div>
+      </div>
+      <div class="art-scroll">
+        <div class="art-inner">
+          <div class="art-ver-box">
+            <div class="avb-top"><span class="avb-label">branch tree</span><span class="avb-cur" id="avb-cur"></span></div>
+            <div id="art-svg-wrap"></div>
+            <div class="avb-hint" id="avb-hint"></div>
+          </div>
+          <div class="fork-note" id="fork-note"></div>
+          <div class="art-kicker" id="art-kicker"></div>
+          <div class="art-title" id="art-title"></div>
+          <div class="art-deck" id="art-deck"></div>
+          <div class="art-byline">
+            <div class="art-av-lg" id="art-av"></div>
+            <div><div class="art-byname" id="art-byname"></div><div class="art-bymeta" id="art-bymeta"></div></div>
+          </div>
+          <div class="art-body" id="art-body"></div>
+          <div class="art-actions">
+            <button class="abtn fork-btn" onclick="openBranchModal()">⑂ Branch this article</button>
+            <button class="abtn merge-btn" onclick="openMergeModal()">↰ Request merge</button>
+            <button class="abtn" onclick="showWrite()">✎ Write a response</button>
+            <button class="abtn">◇ Bookmark</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── EXPLORE VIEW ── -->
+    <div class="view" id="view-explore">
+      <div class="vheader">
+        <input class="search-bar" placeholder="Search ideas, authors, topics…">
+      </div>
+      <div class="vscroll">
+        <div class="explore-section">Trending topics</div>
+        <div class="topic-grid">
+          <div class="topic-card">
+            <div class="tc-top"><div class="tc-name">Urbanism</div><div class="tc-count">284 articles · 47 branches this week</div></div>
+            <div class="tc-desc">Cities, infrastructure, public space, and the politics of how we build places to live.</div>
+            <div class="tc-authors"><div class="tc-av" style="color:var(--grn)">MR</div><div class="tc-av" style="color:var(--amb)">JC</div><div class="tc-av" style="color:var(--blu)">KO</div></div>
+          </div>
+          <div class="topic-card">
+            <div class="tc-top"><div class="tc-name">AI & cognition</div><div class="tc-count">516 articles · 88 branches this week</div></div>
+            <div class="tc-desc">Machine intelligence, attention, memory, and what it means to think at scale.</div>
+            <div class="tc-authors"><div class="tc-av" style="color:var(--pur)">TN</div><div class="tc-av" style="color:var(--grn)">AT</div></div>
+          </div>
+          <div class="topic-card">
+            <div class="tc-top"><div class="tc-name">Political economy</div><div class="tc-count">391 articles · 63 branches this week</div></div>
+            <div class="tc-desc">Institutions, power, distribution, and why markets look like they do.</div>
+            <div class="tc-authors"><div class="tc-av" style="color:var(--blu)">AS</div><div class="tc-av" style="color:var(--grn)">PW</div></div>
+          </div>
+          <div class="topic-card">
+            <div class="tc-top"><div class="tc-name">Philosophy of mind</div><div class="tc-count">208 articles · 34 branches this week</div></div>
+            <div class="tc-desc">Consciousness, qualia, intentionality, and the hard problem — argued in public.</div>
+            <div class="tc-authors"><div class="tc-av" style="color:var(--pur)">AK</div><div class="tc-av" style="color:var(--amb)">YS</div></div>
+          </div>
+          <div class="topic-card">
+            <div class="tc-top"><div class="tc-name">Network states</div><div class="tc-count">142 articles · 29 branches this week</div></div>
+            <div class="tc-desc">Startup societies, digital governance, and the future of political community.</div>
+            <div class="tc-authors"><div class="tc-av" style="color:var(--grn)">AT</div><div class="tc-av" style="color:var(--blu)">RK</div></div>
+          </div>
+          <div class="topic-card">
+            <div class="tc-top"><div class="tc-name">Climate & systems</div><div class="tc-count">322 articles · 51 branches this week</div></div>
+            <div class="tc-desc">Ecological systems, feedback loops, and the politics of decarbonisation.</div>
+            <div class="tc-authors"><div class="tc-av" style="color:var(--grn)">LH</div><div class="tc-av" style="color:var(--amb)">SK</div></div>
+          </div>
+        </div>
+        <div class="suggested-head">Writers to follow</div>
+        <div class="suggested-item">
+          <div class="si-av" style="color:var(--grn)">MR</div>
+          <div><div class="si-name">maya_r</div><div class="si-handle">@maya_rodriguez · urbanism · complexity</div></div>
+          <div class="si-meta">Branch score 847<br>11 branches received</div>
+          <button class="follow-btn" onclick="toggleFollow(this)">Follow</button>
+        </div>
+        <div class="suggested-item">
+          <div class="si-av" style="color:var(--blu)">AS</div>
+          <div><div class="si-name">a_sharma</div><div class="si-handle">@arjun_sharma · economics · institutions</div></div>
+          <div class="si-meta">Branch score 1,204<br>7 branches received</div>
+          <button class="follow-btn following" onclick="toggleFollow(this)">Following</button>
+        </div>
+        <div class="suggested-item">
+          <div class="si-av" style="color:var(--pur)">TN</div>
+          <div><div class="si-name">t_nakamura</div><div class="si-handle">@takeshi_n · AI · cognitive science</div></div>
+          <div class="si-meta">Branch score 592<br>4 branches received</div>
+          <button class="follow-btn" onclick="toggleFollow(this)">Follow</button>
+        </div>
+        <div class="suggested-item">
+          <div class="si-av" style="color:var(--amb)">JC</div>
+          <div><div class="si-name">j_chen</div><div class="si-handle">@jessica_chen · urbanism · transit · equity</div></div>
+          <div class="si-meta">Branch score 413<br>2 branches received</div>
+          <button class="follow-btn" onclick="toggleFollow(this)">Follow</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── BRANCHES VIEW ── -->
+    <div class="view" id="view-forks">
+      <div class="vheader">
+        <div style="font-size:16px;font-weight:500;color:var(--t1);flex:1;">Your branches</div>
+        <div class="notif-filter">
+          <button class="nf active" onclick="setNFActive(this)">All</button>
+          <button class="nf" onclick="setNFActive(this)">Open</button>
+          <button class="nf" onclick="setNFActive(this)">Merged</button>
+        </div>
+      </div>
+      <div class="vscroll">
+        <div class="notif unread">
+          <div class="notif-icon" style="background:var(--amb3);color:var(--amb);">⑂</div>
+          <div class="notif-body">
+            <div class="notif-text"><strong>Branch accepted:</strong> your branch of maya_r's "deliberately slow cities" was accepted as a merge into v2.3</div>
+            <div class="notif-meta">3 days ago · urbanism</div>
+            <div class="notif-preview">Your equity section is now part of the main article. You are listed as co-author at v2.3.</div>
+          </div>
+        </div>
+        <div class="notif">
+          <div class="notif-icon" style="background:var(--grn3);color:var(--grn);">⑂</div>
+          <div class="notif-body">
+            <div class="notif-text"><strong>Branch open:</strong> "Attention as scarcity — a political economy view" branched from t_nakamura</div>
+            <div class="notif-meta">14h ago · AI · economics · 0 responses</div>
+            <div class="notif-preview">Takeshi's attention model is compelling but sidesteps the question of who captures the attention surplus.</div>
+          </div>
+        </div>
+        <div class="notif">
+          <div class="notif-icon" style="background:var(--blu3);color:var(--blu);">↰</div>
+          <div class="notif-body">
+            <div class="notif-text"><strong>Merge request pending:</strong> your branch proposes merge into a_sharma v3.0</div>
+            <div class="notif-meta">2 days ago · economics · awaiting response</div>
+            <div class="notif-preview">The Tokyo coordination case extends the institutional topology argument significantly.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── NOTIFICATIONS VIEW ── -->
+    <div class="view" id="view-notif">
+      <div class="vheader">
+        <div style="font-size:16px;font-weight:500;color:var(--t1);flex:1;">Notifications</div>
+        <div class="notif-filter">
+          <button class="nf active" onclick="setNFActive(this)">All</button>
+          <button class="nf" onclick="setNFActive(this)">Branches</button>
+          <button class="nf" onclick="setNFActive(this)">Merges</button>
+          <button class="nf" onclick="setNFActive(this)">Mentions</button>
+        </div>
+      </div>
+      <div class="vscroll">
+        <div class="notif unread">
+          <div class="notif-icon" style="background:var(--amb3);color:var(--amb);">⑂</div>
+          <div class="notif-body">
+            <div class="notif-text"><strong>k_obi</strong> branched your article "The attention economy needs a union"</div>
+            <div class="notif-meta">45 min ago</div>
+            <div class="notif-preview">Branched as: "Organising attention workers — a labour theory approach"</div>
+          </div>
+        </div>
+        <div class="notif unread">
+          <div class="notif-icon" style="background:var(--grn3);color:var(--grn);">↰</div>
+          <div class="notif-body">
+            <div class="notif-text"><strong>l_huang</strong> sent a merge request into your article at v2.1</div>
+            <div class="notif-meta">2h ago · 1 response needed</div>
+            <div class="notif-preview">"The Tokyo distribution data provides empirical grounding for the coordination thesis in section 3."</div>
+          </div>
+        </div>
+        <div class="notif unread">
+          <div class="notif-icon" style="background:var(--blu3);color:var(--blu);">◈</div>
+          <div class="notif-body">
+            <div class="notif-text"><strong>p_west</strong> and <strong>2 others</strong> started following you</div>
+            <div class="notif-meta">4h ago</div>
+          </div>
+        </div>
+        <div class="notif unread">
+          <div class="notif-icon" style="background:var(--pur3);color:var(--pur);">◻</div>
+          <div class="notif-body">
+            <div class="notif-text"><strong>a_sharma</strong> highlighted a passage in your article and added a note</div>
+            <div class="notif-meta">6h ago · political economy</div>
+            <div class="notif-preview">"This framing of institutional topology is exactly what the coordination thesis needs at the micro level."</div>
+          </div>
+        </div>
+        <div class="notif unread">
+          <div class="notif-icon" style="background:var(--grn3);color:var(--grn);">⑂</div>
+          <div class="notif-body">
+            <div class="notif-text"><strong>Your branch score</strong> reached 250 — you are in the top 8% of contributors this month</div>
+            <div class="notif-meta">1 day ago</div>
+          </div>
+        </div>
+        <div class="notif">
+          <div class="notif-icon" style="background:var(--amb3);color:var(--amb);">⑂</div>
+          <div class="notif-body">
+            <div class="notif-text"><strong>t_nakamura</strong> branched your article "Collective intelligence needs infrastructure"</div>
+            <div class="notif-meta">2 days ago</div>
+            <div class="notif-preview">Branched as: "Infrastructure is not neutral — a critique"</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PROFILE VIEW ── -->
+    <div class="view" id="view-profile">
+      <div class="vscroll">
+        <div class="profile-header">
+          <div class="profile-top">
+            <div class="profile-av">AT</div>
+            <div class="profile-info">
+              <div class="profile-name">Amazaatan Turzanke</div>
+              <div class="profile-handle">@amazaatan · joined September 2025</div>
+              <div class="profile-bio">Building Verdate and Lumera Republic. Writer on network states, collective intelligence, and Afro-European identity.</div>
+              <div class="profile-links">
+                <span>London, UK</span>
+                <span class="profile-link">lumeragovernance.com</span>
+              </div>
+            </div>
+            <div>
+              <button class="edit-btn">Edit profile</button>
+            </div>
+          </div>
+          <div class="profile-stats">
+            <div class="pstat"><div class="pstat-num">12</div><div class="pstat-label">Articles</div></div>
+            <div class="pstat" style="margin-left:24px;"><div class="pstat-num">8</div><div class="pstat-label">Branches given</div></div>
+            <div class="pstat" style="margin-left:24px;"><div class="pstat-num">5</div><div class="pstat-label">Branches received</div></div>
+            <div class="pstat" style="margin-left:24px;"><div class="pstat-num">142</div><div class="pstat-label">Followers</div></div>
+            <div class="pstat" style="margin-left:24px;"><div class="pstat-num">88</div><div class="pstat-label">Following</div></div>
+          </div>
+          <div class="profile-tabs">
+            <div class="ptab active" onclick="setPTabActive(this)">Articles</div>
+            <div class="ptab" onclick="setPTabActive(this)">Branches</div>
+            <div class="ptab" onclick="setPTabActive(this)">Co-authored</div>
+            <div class="ptab" onclick="setPTabActive(this)">Bookmarks</div>
+          </div>
+        </div>
+
+        <!-- Branch Score -->
+        <div class="branch-score-banner">
+          <div>
+            <div class="bs-label">Branch score</div>
+            <div class="bs-score">247</div>
+          </div>
+          <div class="bs-bar-wrap">
+            <div class="bs-label">Top 12% this month · 5 ideas built upon</div>
+            <div class="bs-desc">Your branch score reflects how many times your ideas have been meaningfully built upon. It grows every time someone branches or merges your work.</div>
+            <div class="bs-bar"><div class="bs-bar-fill" style="width:62%;"></div></div>
+          </div>
+        </div>
+
+        <!-- Co-authors -->
+        <div class="coauth-section">
+          <div class="coauth-title">Co-authors</div>
+          <div class="coauth-list">
+            <div class="coauth-chip"><div class="coauth-av" style="color:var(--grn)">MR</div><span class="coauth-name">maya_r</span><span class="coauth-count">· 3</span></div>
+            <div class="coauth-chip"><div class="coauth-av" style="color:var(--blu)">AS</div><span class="coauth-name">a_sharma</span><span class="coauth-count">· 2</span></div>
+            <div class="coauth-chip"><div class="coauth-av" style="color:var(--pur)">TN</div><span class="coauth-name">t_nakamura</span><span class="coauth-count">· 1</span></div>
+            <div class="coauth-chip"><div class="coauth-av" style="color:var(--amb)">KO</div><span class="coauth-name">k_obi</span><span class="coauth-count">· 1</span></div>
+          </div>
+        </div>
+
+        <!-- Articles list -->
+        <div class="post" onclick="openArticle('new1')">
+          <div class="av-col"><div class="av" style="color:var(--grn)">AT</div></div>
+          <div class="pmain">
+            <div class="phead"><span class="pname">amazaatan</span><span class="ptime">2 days ago</span></div>
+            <div class="ptitle">Collective intelligence needs infrastructure</div>
+            <div class="pdeck">The chess stunt was not a parlour trick. It was proof that distributed thinking can beat expert individual thinking — if the scaffolding is right.</div>
+            <div class="ptags"><span class="tag g">network states</span><span class="tag">AI</span><span class="tag">12 min</span></div>
+            <div class="pacts"><div class="pa">◻ 34</div><div class="pa">⑂ 5 branches</div><div class="pa">◇ 87</div></div>
+          </div>
+        </div>
+        <div class="post">
+          <div class="av-col"><div class="av" style="color:var(--grn)">AT</div></div>
+          <div class="pmain">
+            <div class="phead"><span class="pname">amazaatan</span><span class="ptime">1 week ago</span></div>
+            <div class="ptitle">Why Lumera Republic needs a language</div>
+            <div class="pdeck">A society without a language is a community that borrows its intellectual framework from someone else's nation.</div>
+            <div class="ptags"><span class="tag g">Lumera</span><span class="tag a">linguistics</span><span class="tag">8 min</span></div>
+            <div class="pacts"><div class="pa">◻ 19</div><div class="pa">⑂ 3 branches</div><div class="pa">◇ 54</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── WRITE VIEW ── -->
+    <div class="view" id="view-write">
+      <div class="vheader">
+        <div class="back" onclick="showView('feed')">← Discard</div>
+        <div class="editor-bar">
+          <span class="editor-status" id="editor-status">Draft · not saved</span>
+          <button class="abtn" onclick="saveEditor()">Save draft</button>
+          <button class="editor-pub-btn" onclick="publishEditor()">Publish →</button>
+        </div>
+      </div>
+      <div class="editor-toolbar">
+        <button class="etb sep">B</button>
+        <button class="etb">I</button>
+        <button class="etb sep">H1</button>
+        <button class="etb">H2</button>
+        <button class="etb sep">⁋</button>
+        <button class="etb">— </button>
+        <button class="etb sep">[ ]</button>
+        <button class="etb">⑂ Branch from…</button>
+      </div>
+      <div class="editor-wrap">
+        <div class="editor-main">
+          <div class="editor-inner">
+            <div class="fork-from-box" id="fork-from-box" style="display:none;">
+              <div class="ffb-label">Branching from</div>
+              <div class="ffb-title" id="ffb-title"></div>
+              <div class="ffb-meta" id="ffb-meta"></div>
+            </div>
+            <div class="editor-meta">
+              <input class="editor-field" placeholder="Publication (optional)">
+              <input class="editor-field" placeholder="Kicker / category (e.g. urbanism · complexity)">
+            </div>
+            <input class="editor-title-field" id="editor-title" placeholder="Your title…" oninput="updateEditorStatus()">
+            <textarea class="editor-deck-field" placeholder="A short, compelling deck — one or two sentences…" oninput="updateEditorStatus()" rows="2"></textarea>
+            <textarea class="editor-body-field" id="editor-body" placeholder="Start writing…" oninput="updateEditorStatus()" rows="20"></textarea>
+          </div>
+        </div>
+        <div class="editor-sidebar">
+          <div class="editor-panel">
+            <div class="ep-title">Tags</div>
+            <input class="ep-field" placeholder="Add a tag…">
+            <div class="ep-tags">
+              <div class="ep-tag sel">network states</div>
+              <div class="ep-tag">urbanism</div>
+              <div class="ep-tag">economics</div>
+              <div class="ep-tag">AI</div>
+              <div class="ep-tag">philosophy</div>
+              <div class="ep-tag">linguistics</div>
+            </div>
+            <div class="ep-divider"></div>
+            <div class="ep-title">Settings</div>
+            <div class="ep-row"><span class="ep-label">Open to branches</span><div class="ep-toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="ep-row"><span class="ep-label">Open to merges</span><div class="ep-toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="ep-row"><span class="ep-label">Attribution visible</span><div class="ep-toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="ep-divider"></div>
+            <div class="ep-title">Version</div>
+            <div style="font-size:11px;color:var(--t3);line-height:1.6;">This will be published as <strong style="color:var(--t2)">v1.0</strong> — the first commit in your branch tree.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+const ASVG1=`<svg width="100%" height="115" viewBox="0 0 500 115" style="display:block;cursor:default;"><line x1="28" y1="44" x2="474" y2="44" stroke="#2a2a2a" stroke-width="2.5"/><line x1="168" y1="44" x2="230" y2="80" stroke="#7a5e1e" stroke-width="1.5" stroke-dasharray="5,3"/><line x1="230" y1="80" x2="388" y2="80" stroke="#7a5e1e" stroke-width="1.5"/><line x1="288" y1="44" x2="338" y2="12" stroke="#2a5e3f" stroke-width="1.5" stroke-dasharray="5,3"/><line x1="338" y1="12" x2="434" y2="12" stroke="#2a5e3f" stroke-width="1.5"/><circle cx="48" cy="44" r="7" fill="#162e1f" stroke="#4a9e6b" stroke-width="2"/><circle cx="128" cy="44" r="7" fill="#162e1f" stroke="#4a9e6b" stroke-width="2"/><circle cx="168" cy="44" r="7" fill="#3d2e0a" stroke="#c49a3c" stroke-width="2"/><circle cx="288" cy="44" r="7" fill="#0e2040" stroke="#4a7fc1" stroke-width="2"/><circle cx="370" cy="44" r="7" fill="#162e1f" stroke="#4a9e6b" stroke-width="2"/><circle cx="454" cy="44" r="9" fill="#4a9e6b" stroke="#4a9e6b" stroke-width="2.5"/><circle cx="308" cy="80" r="7" fill="#3d2e0a" stroke="#c49a3c" stroke-width="2"/><circle cx="378" cy="80" r="7" fill="#3d2e0a" stroke="#c49a3c" stroke-width="2"/><circle cx="352" cy="12" r="6" fill="#162e1f" stroke="#4a9e6b" stroke-width="1.5"/><circle cx="424" cy="12" r="6" fill="#4a9e6b" stroke="#4a9e6b" stroke-width="1.5"/><text x="48" y="62" text-anchor="middle" fill="#555" font-size="9" font-family="IBM Plex Mono">v1.0</text><text x="128" y="62" text-anchor="middle" fill="#555" font-size="9" font-family="IBM Plex Mono">v2.0</text><text x="454" y="62" text-anchor="middle" fill="#162e1f" font-size="9" font-family="IBM Plex Mono" font-weight="500">v2.3●</text><circle cx="28" cy="108" r="4" fill="#4a9e6b"/><text x="37" y="112" fill="#444" font-size="9" font-family="IBM Plex Mono">commit</text><circle cx="95" cy="108" r="4" fill="#3d2e0a" stroke="#c49a3c" stroke-width="1.5"/><text x="104" y="112" fill="#444" font-size="9" font-family="IBM Plex Mono">branch</text><circle cx="158" cy="108" r="4" fill="#0e2040" stroke="#4a7fc1" stroke-width="1.5"/><text x="167" y="112" fill="#444" font-size="9" font-family="IBM Plex Mono">merge</text></svg>`;
+
+const ASVG2=`<svg width="420" height="80" viewBox="0 0 420 80" style="display:block;"><line x1="20" y1="40" x2="400" y2="40" stroke="#2a2a2a" stroke-width="2.5"/><line x1="120" y1="40" x2="170" y2="65" stroke="#7a5e1e" stroke-width="1.5" stroke-dasharray="5,3"/><line x1="170" y1="65" x2="340" y2="65" stroke="#7a5e1e" stroke-width="1.5"/><line x1="200" y1="40" x2="250" y2="16" stroke="#4a3578" stroke-width="1.5" stroke-dasharray="5,3"/><line x1="250" y1="16" x2="360" y2="16" stroke="#4a3578" stroke-width="1.5"/><circle cx="40" cy="40" r="7" fill="#162e1f" stroke="#4a9e6b" stroke-width="2"/><circle cx="120" cy="40" r="7" fill="#3d2e0a" stroke="#c49a3c" stroke-width="2"/><circle cx="200" cy="40" r="7" fill="#201828" stroke="#8b6ec1" stroke-width="2"/><circle cx="300" cy="40" r="7" fill="#0e2040" stroke="#4a7fc1" stroke-width="2"/><circle cx="380" cy="40" r="9" fill="#4a9e6b" stroke="#4a9e6b" stroke-width="2.5"/><circle cx="260" cy="65" r="6" fill="#3d2e0a" stroke="#c49a3c" stroke-width="1.5"/><circle cx="330" cy="65" r="6" fill="#c49a3c" stroke="#c49a3c" stroke-width="1.5"/><circle cx="270" cy="16" r="6" fill="#201828" stroke="#8b6ec1" stroke-width="1.5"/><circle cx="350" cy="16" r="6" fill="#8b6ec1" stroke="#8b6ec1" stroke-width="1.5"/></svg>`;
+
+const DATA={
+  main1:{ver:'v2.3 · maya_r · current',svg:ASVG1,hint:'Green = main commits · Amber = j_chen fork · Blue = k_obi merge',isFork:false,kicker:'urbanism · complexity',title:'The case for deliberately slow cities',deck:'What if urban friction is not a problem to be solved, but a resource to be cultivated?',av:'MR',avc:'#4a9e6b',byname:'maya_r',bymeta:'The Long Form · v2.3 · 12 min read · 2h ago',body:[{lede:true,t:'The friction-density index measures something most urban planners have been trained to eliminate.'},{t:'A city that moves efficiently is a city that moves. A city that moves with friction — unexpected encounters, detours, the coffee shop you walk past three times before entering — is a city that creates.'},{t:'v2.3 integrates j_chen\'s dual-speed model and k_obi\'s Copenhagen/Amsterdam empirics. The FDI is now a descriptive tool, not a prescription.',muted:true}]},
+  v1:{ver:'v1.0 · maya_r · initial commit',svg:ASVG1,hint:'This is the original article — before any branches or merges',isFork:false,kicker:'urbanism',title:'The case for deliberately slow cities',deck:'A first draft. The friction-density index is proposed for the first time.',av:'MR',avc:'#4a9e6b',byname:'maya_r',bymeta:'The Long Form · v1.0 · 9 min read · 4 days ago',body:[{lede:true,t:'Urban efficiency is a false god. The cities we remember best are the ones that resisted optimisation.'},{t:'I am proposing a friction-density index: a measure of how many unplanned interactions a street, neighbourhood, or district produces per hour of transit time. High FDI = productive slowness.'}]},
+  v2:{ver:'v2.0 · maya_r · friction as design variable',svg:ASVG1,hint:'v2.0 — friction reframed as a design variable, not a failure',isFork:false,kicker:'urbanism · complexity',title:'The case for deliberately slow cities',deck:'Revised: friction is not a bug, it is a feature — and it can be designed.',av:'MR',avc:'#4a9e6b',byname:'maya_r',bymeta:'The Long Form · v2.0 · 11 min read · 3 days ago',body:[{lede:true,t:'The v1 framing was too nostalgic. Friction is not valuable because cities used to have more of it — it is valuable because of what it produces.'},{t:'The FDI is now a design variable: urban planners can optimise for it just as they optimise for flow. The goal is not to make cities slower. It is to make them more generative.'}]},
+  fork_jchen:{ver:'branch · j_chen · dual-speed theory',svg:ASVG1,hint:'You are reading j_chen\'s branch — branched from maya_r v2.2',isFork:true,forkNote:'⑂  Branched from maya_r v2.2 by j_chen — open for merge requests',kicker:'urbanism · transit · equity',title:'Slow neighbourhoods, fast corridors: a dual-speed urban theory',deck:'Friction must be spatially differentiated to be humane — not applied universally.',av:'JC',avc:'#c49a3c',byname:'j_chen',bymeta:'Urban Futures · branch of maya_r v2.2 · 9 min read · 5h ago',body:[{lede:true,t:'Maya\'s friction-density index is compelling. It also, as stated, risks romanticising slowness universally.'},{t:'A city slow everywhere is inaccessible. High-FDI zones at neighbourhood scale, low-FDI corridors at city scale. Complementary layers, not competing visions.'},{t:'A merge request to maya_r\'s main branch has been opened.',muted:true}]},
+  fork_pwest:{ver:'branch · p_west · equity critique',svg:ASVG1,hint:'You are reading p_west\'s branch — equity critique of the FDI',isFork:true,forkNote:'⑂  Branched from maya_r v2.1 by p_west',kicker:'urbanism · equity · access',title:'High-friction cities aren\'t equitable',deck:'The FDI model encodes a class bias that must be made explicit.',av:'PW',avc:'#4a9e6b',byname:'p_west',bymeta:'Branch of maya_r v2.1 · 7 min read · 8h ago',body:[{lede:true,t:'The friction-density index is a powerful tool. It is also, as currently framed, a framework for the affluent.'},{t:'Unplanned encounters are a luxury of proximity. Workers who commute 90 minutes each way cannot afford to live in high-FDI neighbourhoods.'},{t:'The j_chen dual-speed model is a partial solution. The power-structure question remains.',muted:true}]},
+  merge_kobi:{ver:'merge · k_obi → maya_r · v2.1',svg:ASVG1,hint:'Merge commit — k_obi\'s empirics integrated at v2.1',isFork:true,forkNote:'↰  Merged from k_obi into maya_r v2.1 · accepted 3 days ago',kicker:'urbanism · empirics',title:'Pedestrian encounter rates: Copenhagen & Amsterdam field data',deck:'Empirical grounding for the FDI framework.',av:'KO',avc:'#4a7fc1',byname:'k_obi',bymeta:'Merge into maya_r · v2.1 · 6 min read · 3 days ago',body:[{lede:true,t:'Copenhagen\'s Strøget scores an FDI of approximately 0.74. Amsterdam\'s Jordaan district scores 0.81.'},{t:'The correlation between high FDI scores and positive qualitative assessments of urban life is not causal — but it is not nothing.'},{t:'Full methodology and data in appendix.',muted:true}]},
+  main2:{ver:'v4.0 · a_sharma · current',svg:ASVG2,hint:'Amber = l_huang Tokyo branch · Purple = p_west critique · Blue = merge commits',isFork:false,kicker:'economics · institutions',title:'Abundance is a coordination problem, not a production problem',deck:'We already produce enough. The constraint is always institutional topology, never output.',av:'AS',avc:'#4a7fc1',byname:'a_sharma',bymeta:'Systems & Society · v4.0 · 18 min read · 6h ago',body:[{lede:true,t:'The standard story of poverty is one of scarcity. This story is empirically false.'},{t:'We produce roughly 1.5x the calories required to feed every person alive. The bottleneck is never supply — it is the institutional topology that allocates what we produce.'},{t:'v4.0 integrates l_huang\'s Tokyo case study and p_west\'s institutional critique.',muted:true}]},
+  fork_a2_1:{ver:'branch · l_huang · Tokyo case study',svg:ASVG2,hint:'l_huang\'s branch — Tokyo distribution networks',isFork:true,forkNote:'⑂  Branched from a_sharma v2.0 by l_huang · merged into main at v3.0',kicker:'economics · japan',title:'Tokyo\'s food distribution as a post-scarcity prototype',deck:'A concrete instantiation of the coordination thesis, at city scale.',av:'LH',avc:'#c49a3c',byname:'l_huang',bymeta:'Branch of a_sharma v2.0 · 11 min read · 1 day ago',body:[{lede:true,t:'Tokyo distributes food to 14 million people daily with less than 3% waste. This is a miracle of coordination, not production.'},{t:'The Tsukiji-to-Toyosu transition: same produce, radically different institutional topology. Waste dropped 40%.',muted:true}]},
+  fork_a2_2:{ver:'branch · p_west · political economy critique',svg:ASVG2,hint:'p_west\'s branch — who controls the coordinators?',isFork:true,forkNote:'⑂  Branched from a_sharma v2.0 by p_west',kicker:'economics · political economy',title:'Coordination problems require political solutions',deck:'The institutional redesign framing sidesteps who redesigns institutions that benefit the powerful.',av:'PW',avc:'#8b6ec1',byname:'p_west',bymeta:'Branch of a_sharma v2.0 · 9 min read · 18h ago',body:[{lede:true,t:'Sharma is correct that abundance is a coordination problem. The question left unanswered: coordination by whom?'},{t:'Institutional redesign is a political contest. The institutions that misallocate abundance were not designed badly — they were designed well to serve particular interests.',muted:true}]},
+  new1:{ver:'v1.0 · amazaatan · current',svg:'<svg width="160" height="50" viewBox="0 0 160 50" style="display:block;"><line x1="20" y1="25" x2="140" y2="25" stroke="#2a2a2a" stroke-width="2.5"/><circle cx="40" cy="25" r="7" fill="#162e1f" stroke="#4a9e6b" stroke-width="2"/><circle cx="120" cy="25" r="9" fill="#4a9e6b" stroke="#4a9e6b" stroke-width="2.5"/><text x="40" y="42" text-anchor="middle" fill="#555" font-size="9" font-family="IBM Plex Mono">v1.0●</text></svg>',hint:'No branches yet — be the first',isFork:false,kicker:'network states · AI',title:'Collective intelligence needs infrastructure',deck:'The chess stunt was not a parlour trick. It was proof that distributed thinking can beat expert individual thinking — if the scaffolding is right.',av:'AT',avc:'#4a9e6b',byname:'amazaatan',bymeta:'v1.0 · 12 min read · 2 days ago',body:[{lede:true,t:'When 10,000 people built an opening preparation for 20 grandmasters to play against Stockfish, something unusual happened.'},{t:'The collective didn\'t just produce a serviceable opening — it produced a preparation that no individual grandmaster would have found. The branching process surfaced lines that experts had dismissed and combinations that only became visible when many minds worked the same problem simultaneously.'},{t:'This is what Verdate is trying to replicate at the level of ideas. Not crowdsourcing — that pools opinions. Branching — which develops arguments.',muted:true}]}
+};
+
+let currentArticle = null;
+
+const tooltip = document.getElementById('tooltip');
+document.addEventListener('mousemove', e => {
+  const t = e.target.closest('[data-tip]');
+  if(t){tooltip.textContent=t.getAttribute('data-tip');tooltip.classList.add('show');tooltip.style.left=(e.clientX+14)+'px';tooltip.style.top=(e.clientY-32)+'px';}
+  else{tooltip.classList.remove('show');}
+});
+
+function enterApp(){
+  document.getElementById('landing').classList.remove('visible');
+  document.getElementById('app').style.display='flex';
+}
+
+function joinWaitlist(){
+  const email = document.getElementById('waitlist-email').value;
+  if(email){
+    document.getElementById('waitlist-confirm').style.display='block';
+    document.getElementById('waitlist-email').value='';
+  }
+}
+
+function showView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('visible'));
+  const el = document.getElementById('view-'+id);
+  if(el) el.classList.add('visible');
+  document.querySelectorAll('.si').forEach(s=>s.classList.remove('active'));
+  const nav = document.getElementById('nav-'+id);
+  if(nav) nav.classList.add('active');
+}
+
+function showWrite(fromBranch){
+  showView('write');
+  if(fromBranch && currentArticle){
+    const d = DATA[currentArticle];
+    document.getElementById('fork-from-box').style.display='block';
+    document.getElementById('ffb-title').textContent = d.title;
+    document.getElementById('ffb-meta').textContent = d.byname + ' · ' + d.ver;
+  } else {
+    document.getElementById('fork-from-box').style.display='none';
+  }
+}
+
+function openArticle(id){
+  const a=DATA[id]; if(!a) return;
+  currentArticle = id;
+  showView('article');
+  document.getElementById('art-breadcrumb').textContent=a.ver;
+  document.getElementById('avb-cur').textContent=a.ver.split(' · ').slice(0,2).join(' · ');
+  document.getElementById('art-svg-wrap').innerHTML=a.svg;
+  document.getElementById('avb-hint').textContent=a.hint||'';
+  const fn=document.getElementById('fork-note');
+  if(a.isFork&&a.forkNote){fn.style.display='block';fn.textContent=a.forkNote;}else{fn.style.display='none';}
+  document.getElementById('art-kicker').textContent=a.kicker;
+  document.getElementById('art-title').textContent=a.title;
+  document.getElementById('art-deck').textContent=a.deck;
+  const artAv=document.getElementById('art-av');
+  artAv.textContent=a.av; artAv.style.color=a.avc;
+  document.getElementById('art-byname').textContent=a.byname;
+  document.getElementById('art-bymeta').textContent=a.bymeta;
+  document.getElementById('art-body').innerHTML=a.body.map(p=>`<p${p.lede?' class="lede"':''}${p.muted?' class="muted"':''}>${p.t}</p>`).join('');
+  document.querySelector('.art-scroll').scrollTop=0;
+}
+
+function openBranchModal(){
+  if(!currentArticle) return;
+  const d = DATA[currentArticle];
+  document.getElementById('bm-title').textContent = d.title;
+  document.getElementById('bm-meta').textContent = d.byname + ' · ' + d.ver;
+  document.getElementById('bm-new-title').value='';
+  document.getElementById('branch-modal').classList.add('visible');
+}
+
+function closeBranchModal(){document.getElementById('branch-modal').classList.remove('visible');}
+
+function confirmBranch(){
+  closeBranchModal();
+  showWrite(true);
+}
+
+function openMergeModal(){
+  if(!currentArticle) return;
+  const d = DATA[currentArticle];
+  document.getElementById('mm-title').textContent = d.title;
+  document.getElementById('mm-meta').textContent = d.byname + ' · ' + d.ver;
+  document.getElementById('merge-modal').classList.add('visible');
+}
+
+function closeMergeModal(){document.getElementById('merge-modal').classList.remove('visible');}
+
+function confirmMerge(){
+  closeMergeModal();
+  showView('notif');
+  alert('Merge request sent — you will be notified when the author responds.');
+}
+
+function setSortActive(el){document.querySelectorAll('.fsort').forEach(b=>b.classList.remove('active'));el.classList.add('active');}
+function setTabActive(el){document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
+function setNFActive(el){const p=el.parentNode;p.querySelectorAll('.nf').forEach(n=>n.classList.remove('active'));el.classList.add('active');}
+function setPTabActive(el){document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
+function toggleFollow(btn){btn.classList.toggle('following');btn.textContent=btn.classList.contains('following')?'Following':'Follow';}
+
+let editorTimer;
+function updateEditorStatus(){
+  document.getElementById('editor-status').textContent='Draft · saving…';
+  clearTimeout(editorTimer);
+  editorTimer=setTimeout(()=>{document.getElementById('editor-status').textContent='Draft · saved';},900);
+}
+function saveEditor(){document.getElementById('editor-status').textContent='Draft · saved';}
+function publishEditor(){
+  if(document.getElementById('editor-title').value.trim()){
+    showView('profile');
+    alert('Published. Your article is now live and open to branches.');
+  }
+}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeBranchModal();closeMergeModal();}});
+</script>
+</body>
+</html>
