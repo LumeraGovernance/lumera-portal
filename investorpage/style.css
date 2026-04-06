@@ -1,0 +1,323 @@
+/* ============================================================
+   LUMERA — Investor Page
+   Aesthetic: Luxury Editorial / Afro-Futurist Refinement
+   Palette: Deep obsidian + warm gold + ivory
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600&display=swap');
+
+/* ── Tokens ─────────────────────────────────────────────── */
+:root {
+  --obsidian:   #08090d;
+  --deep-navy:  #0b0f1a;
+  --surface:    #10141f;
+  --surface-2:  #161b2c;
+  --border:     rgba(200, 168, 90, 0.18);
+  --gold:        #c8a85a;
+  --gold-light:  #e2c97e;
+  --gold-dim:    rgba(200, 168, 90, 0.12);
+  --ivory:       #f4ede0;
+  --ivory-dim:   #c8bfb0;
+  --muted:       #7a7d8a;
+  --r-sm: 6px;
+  --r-md: 14px;
+  --r-lg: 28px;
+}
+
+/* ── Reset & Base ───────────────────────────────────────── */
+*, *::before, *::after {
+  margin: 0; padding: 0;
+  box-sizing: border-box;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--obsidian);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(200,168,90,0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 80% 60%, rgba(11,15,26,0.9) 0%, transparent 100%);
+  color: var(--ivory);
+  font-family: 'Outfit', sans-serif;
+  font-weight: 300;
+  line-height: 1.75;
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 32px 100px;
+  overflow-x: hidden;
+}
+
+/* Subtle grain texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.6;
+}
+
+/* ── Logo ───────────────────────────────────────────────── */
+.logo {
+  display: block;
+  height: 54px;
+  width: auto;
+  margin: 40px 0 0;
+  opacity: 0.88;
+}
+
+/* ── Navigation ─────────────────────────────────────────── */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(8, 9, 13, 0.88);
+  backdrop-filter: blur(18px) saturate(160%);
+  border-bottom: 1px solid var(--border);
+  margin: 28px -32px 0;
+  padding: 0 32px;
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  justify-content: center;
+  padding: 0;
+}
+
+nav li { position: relative; }
+
+nav a {
+  display: inline-block;
+  text-decoration: none;
+  color: var(--ivory-dim);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 20px 18px;
+  transition: color 0.25s ease;
+}
+
+nav a::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 50%; right: 50%;
+  height: 2px;
+  background: var(--gold);
+  transition: left 0.3s ease, right 0.3s ease;
+}
+
+nav a:hover {
+  color: var(--gold-light);
+}
+
+nav a:hover::after {
+  left: 16px; right: 16px;
+}
+
+/* ── Hero / City Images ─────────────────────────────────── */
+.city-image {
+  width: 100%;
+  height: 480px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: var(--r-lg);
+  margin: 56px 0 0;
+  display: block;
+  border: 1px solid var(--border);
+  box-shadow:
+    0 2px 0 rgba(200,168,90,0.25),
+    0 40px 80px -20px rgba(0,0,0,0.7);
+  filter: brightness(0.88) saturate(1.1);
+  transition: filter 0.5s ease;
+}
+
+.city-image:hover { filter: brightness(0.96) saturate(1.15); }
+
+/* ── Section Images ─────────────────────────────────────── */
+.enation-image,
+.special-image,
+.education-image,
+.CTA-image {
+  display: block;
+  width: 100%;
+  max-width: 680px;
+  height: 320px;
+  object-fit: cover;
+  border-radius: var(--r-md);
+  margin: 32px 0;
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 60px -15px rgba(0,0,0,0.65);
+  filter: brightness(0.85) saturate(1.05);
+}
+
+/* ── Section Divider ────────────────────────────────────── */
+.section-divider {
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--border), transparent);
+  margin: 64px 0 0;
+}
+
+/* ── Headings ───────────────────────────────────────────── */
+h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 3rem;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--ivory);
+  margin: 60px 0 24px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  position: relative;
+  padding-left: 0;
+  border-left: none;
+}
+
+h1::before {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 1.5px;
+  background: var(--gold);
+  margin-bottom: 18px;
+  opacity: 0.9;
+}
+
+h1 em, h1 span { color: var(--gold-light); }
+
+/* ── Paragraphs ─────────────────────────────────────────── */
+p {
+  font-size: 1.05rem;
+  color: var(--ivory-dim);
+  max-width: 720px;
+  line-height: 1.85;
+  margin-bottom: 24px;
+  font-weight: 300;
+}
+
+/* ── Project List ───────────────────────────────────────── */
+body > ul {
+  list-style: none;
+  margin: 8px 0 32px;
+  padding: 32px 36px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: inset 0 1px 0 rgba(200,168,90,0.12), 0 20px 40px -10px rgba(0,0,0,0.4);
+}
+
+body > ul li {
+  font-size: 0.98rem;
+  color: var(--ivory-dim);
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding-left: 28px;
+  position: relative;
+  font-weight: 300;
+  letter-spacing: 0.01em;
+  transition: color 0.2s;
+}
+
+body > ul li:last-child { border-bottom: none; }
+
+body > ul li::before {
+  content: '◆';
+  position: absolute;
+  left: 0;
+  top: 14px;
+  color: var(--gold);
+  font-size: 0.5rem;
+  line-height: 1.8;
+  opacity: 0.8;
+}
+
+body > ul li:hover { color: var(--ivory); }
+
+/* ── Links ──────────────────────────────────────────────── */
+a {
+  color: var(--gold-light);
+  text-decoration: none;
+  transition: color 0.2s, opacity 0.2s;
+}
+
+a:hover { color: #fff; opacity: 0.9; }
+
+p a {
+  border-bottom: 1px solid rgba(200,168,90,0.35);
+  padding-bottom: 1px;
+}
+
+p a:hover { border-color: var(--gold-light); }
+
+/* ── Section Card Wrapping ──────────────────────────────── */
+h1 + p {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+}
+
+/* ── Call-to-Action section ─────────────────────────────── */
+#head5 ~ p {
+  display: inline-block;
+}
+
+/* ── CTA Button ─────────────────────────────────────────── */
+p a[href^="mailto"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 13px 30px;
+  background: transparent;
+  border: 1px solid var(--gold);
+  border-radius: 2px;
+  color: var(--gold-light);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.76rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+}
+
+p a[href^="mailto"]:hover {
+  background: var(--gold);
+  color: var(--obsidian);
+  box-shadow: 0 0 28px rgba(200,168,90,0.3);
+}
+
+/* ── Fade-in on scroll (progressive enhancement) ─────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+h1, p, .city-image, .enation-image, .special-image, .education-image, .CTA-image, body > ul {
+  animation: fadeUp 0.7s ease both;
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 768px) {
+  body { padding: 0 18px 60px; }
+
+  nav { margin: 28px -18px 0; padding: 0 18px; }
+
+  nav ul { justify-content: flex-start; overflow-x: auto; flex-wrap: nowrap; }
+  nav a { font-size: 0.68rem; padding: 18px 14px; white-space: nowrap; }
+
+  h1 { font-size: 2.2rem; }
+
+  .city-image { height: 260px; margin: 40px 0 0; }
+  .enation-image, .special-image, .education-image, .CTA-image { height: 220px; }
+
+  body > ul { padding: 22px 22px; }
+}
