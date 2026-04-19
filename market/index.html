@@ -1,0 +1,113 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumera Marketplace</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class ="navbar">
+<nav>
+    <ul>
+        <li><a href="/index.html">Home</a></li>
+        <li><a href="/products.html">Products</a></li>
+        <li><a href="/about.html">About</a></li>
+    </ul>
+
+<div class="search">
+    <input type="text" placeholder="Search...">
+    <button type="submit">Search</button>
+</div>  
+</nav>
+</div>
+
+<div class="hero">
+    <h1>Welcome to Lumera Marketplace</h1>
+    <p>Discover our wide range of products and find the perfect items for you.</p>
+</div>
+
+<div class="product-preview1">
+    <div class="product-item">
+        <img src="img/product1.jpg" alt="Product 1">
+        <caption>Product 1</caption>
+    </div>
+    <div class="product-item">
+        <img src="img/product2.jpg" alt="Product 2">
+        <caption>Product 2</caption>
+    </div>
+    <div class="product-item">
+        <img src="img/product3.jpg" alt="Product 3">
+        <caption>Product 3</caption>
+    </div>
+    <div class="product-item">
+        <img src="img/product4.jpg" alt="Product 4">
+        <caption>Product 4</caption>
+    </div>
+</div>
+
+<div class="product-preview2">
+    <div class="product-item">
+        <img src="img/product5.jpg" alt="Product 5">
+        <caption>Product 5</caption>
+    </div>
+    <div class="product-item">
+        <img src="img/product6.jpg" alt="Product 6">
+        <caption>Product 6</caption>
+    </div>
+    <div class="product-item">
+        <img src="img/product7.jpg" alt="Product 7">
+        <caption>Product 7</caption>
+    </div>
+    <div class="product-item">
+        <img src="img/product8.jpg" alt="Product 8">
+        <caption>Product 8</caption>
+    </div>
+</div>
+
+<div class="product-preview3">
+    <div class="product-item">
+        <img src="img/product9.jpg" alt="Product 9">
+        <caption>Product 9</caption>
+    </div>
+    <div class="product-item">
+        <img src="img/product10.jpg" alt="Product 10">
+        <caption>Product 10</caption>
+    </div>
+    <div class="product-item">
+        <img src="img/product11.jpg" alt="Product 11">
+        <caption>Product 11</caption>
+    </div>
+    <div class="product-item">
+        <img src="img/product12.jpg" alt="Product 12">
+        <caption>Product 12</caption>
+    </div>
+</div></body>
+
+<script>
+// Auto-scroll carousels
+const carousels = document.querySelectorAll('.product-preview1, .product-preview2, .product-preview3');
+
+carousels.forEach(carousel => {
+    let scrollAmount = 0;
+    const scrollSpeed = 1;
+    
+    // Clone items to create infinite loop effect
+    const items = carousel.querySelectorAll('img');
+    items.forEach(item => {
+        const clone = item.cloneNode(true);
+        carousel.appendChild(clone);
+    });
+    
+    setInterval(() => {
+        carousel.scrollLeft += scrollSpeed;
+        
+        // Reset scroll when reaching the end
+        if (carousel.scrollLeft >= carousel.scrollWidth / 2) {
+            carousel.scrollLeft = 0;
+        }
+    }, 30);
+});
+</script>
+
+</html>

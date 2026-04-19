@@ -1,0 +1,544 @@
+{
+  "products": [
+    {
+      "id": "LUM-FR-001",
+      "name": "Romaine Lettuce",
+      "price": 1.47,
+      "category": "Fresh Produce",
+      "size": "Medium Head",
+      "variety": "Classic Green",
+      "description": "Crisp, nutritious leaves perfect for salads and wraps. Fresh and locally sourced.",
+      "image": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FR-002",
+      "name": "Butterhead Lettuce",
+      "price": 1.10,
+      "category": "Fresh Produce",
+      "size": "Large Head",
+      "variety": "Tender Butter",
+      "description": "Tender, buttery leaves with a mild sweet flavor. Perfect for delicate salads.",
+      "image": "https://images.unsplash.com/photo-1599599810694-b3d1a0c3a5d0?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FR-003",
+      "name": "Iceberg Lettuce",
+      "price": 0.73,
+      "category": "Fresh Produce",
+      "size": "Large Head",
+      "variety": "Crispy",
+      "description": "Crispy, refreshing lettuce perfect for salads and classic burgers.",
+      "image": "https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FR-004",
+      "name": "Spinach",
+      "price": 0.92,
+      "category": "Fresh Produce",
+      "size": "5 oz Bundle",
+      "variety": "Fresh Leaf",
+      "description": "Iron-rich, nutrient-packed leafy green for smoothies and cooking",
+      "image": "https://images.unsplash.com/photo-1511690656519-0d582dc4c3f2?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FR-005",
+      "name": "Kale",
+      "price": 1.28,
+      "category": "Fresh Produce",
+      "size": "Medium Bunch",
+      "variety": "Curly Green",
+      "description": "Nutrient-dense superfood with antioxidants and vitamins",
+      "image": "https://images.unsplash.com/photo-1599599810986-c65d52735401?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FR-006",
+      "name": "Swiss Chard",
+      "price": 1.10,
+      "category": "Fresh Produce",
+      "size": "Large Bunch",
+      "variety": "Rainbow",
+      "description": "Colorful leafy green with earthy flavor, great for cooking",
+      "image": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FR-007",
+      "name": "Green Cabbage",
+      "price": 0.80,
+      "category": "Fresh Produce",
+      "size": "Medium Head",
+      "variety": "Standard",
+      "description": "Fiber-rich vegetable perfect for salads, coleslaw, and stews",
+      "image": "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FR-008",
+      "name": "Red Cabbage",
+      "price": 1.03,
+      "category": "Fresh Produce",
+      "size": "Medium Head",
+      "variety": "Purple",
+      "description": "Antioxidant-rich purple cabbage with vibrant color",
+      "image": "https://images.unsplash.com/photo-1511689915500-ad3e8eef5ae6?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FR-009",
+      "name": "Napa Cabbage",
+      "price": 0.92,
+      "category": "Fresh Produce",
+      "size": "Medium Head",
+      "variety": "Asian",
+      "description": "Mild, tender Asian cabbage perfect for stir-fries and soups",
+      "image": "https://images.unsplash.com/photo-1520608147373-339147e65a0e?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FR-010",
+      "name": "Broccoli",
+      "price": 1.32,
+      "category": "Fresh Produce",
+      "size": "2 lb Crown",
+      "variety": "Crown",
+      "description": "Nutrient-dense florets packed with vitamins and minerals",
+      "image": "https://images.unsplash.com/photo-1460003358956-a3a5c67dadc3?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FR-011",
+      "name": "Cauliflower",
+      "price": 1.40,
+      "category": "Fresh Produce",
+      "size": "2 lb Head",
+      "variety": "White",
+      "description": "Versatile cruciferous vegetable great raw or cooked",
+      "image": "https://images.unsplash.com/photo-1540607157537-10fbac8a92a9?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FR-012",
+      "name": "Carrots",
+      "price": 0.72,
+      "category": "Fresh Produce",
+      "size": "2 lb Bag",
+      "variety": "Orange",
+      "description": "Sweet, crunchy root vegetable rich in beta-carotene",
+      "image": "https://images.unsplash.com/photo-1514432324607-2e467f4af445?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FR-013",
+      "name": "White Potatoes",
+      "price": 1.09,
+      "category": "Fresh Produce",
+      "size": "5 lb Bag",
+      "variety": "Russet",
+      "description": "Versatile starchy vegetable perfect for all cooking methods",
+      "image": "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FR-014",
+      "name": "Red Potatoes",
+      "price": 1.22,
+      "category": "Fresh Produce",
+      "size": "5 lb Bag",
+      "variety": "Red",
+      "description": "Waxy potatoes ideal for boiling and potato salads",
+      "image": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FR-015",
+      "name": "Sweet Potatoes",
+      "price": 1.24,
+      "category": "Fresh Produce",
+      "size": "3 lb Bag",
+      "variety": "Orange",
+      "description": "Nutrient-rich with natural sweetness, versatile for any dish",
+      "image": "https://images.unsplash.com/photo-1575004715206-4b115609a626?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FR-016",
+      "name": "Yellow Onions",
+      "price": 0.54,
+      "category": "Fresh Produce",
+      "size": "3 lb Bag",
+      "variety": "Yellow",
+      "description": "Essential aromatic ingredient for cooking and seasoning",
+      "image": "https://images.unsplash.com/photo-1585518419759-d1676b5e1dc7?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FR-017",
+      "name": "Red Onions",
+      "price": 0.72,
+      "category": "Fresh Produce",
+      "size": "2 lb Bag",
+      "variety": "Red",
+      "description": "Milder and sweeter, perfect for raw salads and pickling",
+      "image": "https://images.unsplash.com/photo-1585518419759-d1676b5e1dc7?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FR-018",
+      "name": "Shallot Onions",
+      "price": 0.84,
+      "category": "Fresh Produce",
+      "size": "1 lb Bunch",
+      "variety": "Purple",
+      "description": "Delicate flavor with subtle sweetness for fine cooking",
+      "image": "https://images.unsplash.com/photo-1585518419759-d1676b5e1dc7?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FR-019",
+      "name": "Garlic",
+      "price": 0.36,
+      "category": "Fresh Produce",
+      "size": "1 lb Bulb",
+      "variety": "White",
+      "description": "Pungent aromatic bulb essential for flavorful cooking",
+      "image": "https://images.unsplash.com/photo-1599599810694-b3d1a0c3a5d0?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FR-020",
+      "name": "Red Bell Peppers",
+      "price": 1.21,
+      "category": "Fresh Produce",
+      "size": "Per Piece",
+      "variety": "Red",
+      "description": "Sweet and vibrant, perfect for raw or cooked dishes",
+      "image": "https://images.unsplash.com/photo-1585683203802-66ecb4e12b4e?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FR-021",
+      "name": "Yellow Bell Peppers",
+      "price": 1.10,
+      "category": "Fresh Produce",
+      "size": "Per Piece",
+      "variety": "Yellow",
+      "description": "Mild and sweet with bright yellow color for vibrant meals",
+      "image": "https://images.unsplash.com/photo-1585518419759-d1676b5e1dc7?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FR-022",
+      "name": "Green Bell Peppers",
+      "price": 0.92,
+      "category": "Fresh Produce",
+      "size": "Per Piece",
+      "variety": "Green",
+      "description": "Crisp with grassy flavor, ideal for stuffing and stir-fries",
+      "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FR-023",
+      "name": "Cucumbers",
+      "price": 0.73,
+      "category": "Fresh Produce",
+      "size": "Per Piece",
+      "variety": "English",
+      "description": "Cool and crisp, perfect for salads and refreshing water",
+      "image": "https://images.unsplash.com/photo-1526136647385-b4d3d46fd492?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FR-024",
+      "name": "Zucchini",
+      "price": 0.84,
+      "category": "Fresh Produce",
+      "size": "Per Piece",
+      "variety": "Green Summer",
+      "description": "Versatile summer squash great for grilling and baking",
+      "image": "https://images.unsplash.com/photo-1556652172383-352da4e45c44?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FR-025",
+      "name": "Eggplant",
+      "price": 0.99,
+      "category": "Fresh Produce",
+      "size": "Medium",
+      "variety": "Black Beauty",
+      "description": "Silky texture perfect for roasting and Mediterranean dishes",
+      "image": "https://images.unsplash.com/photo-1609501676725-7186f017a4b8?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FR-026",
+      "name": "Green Beans",
+      "price": 0.92,
+      "category": "Fresh Produce",
+      "size": "1 lb Bunch",
+      "variety": "Fresh Snap",
+      "description": "Tender and crisp, excellent steamed or stir-fried",
+      "image": "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FR-027",
+      "name": "Peas",
+      "price": 1.21,
+      "category": "Fresh Produce",
+      "size": "1 lb Snap",
+      "variety": "Sugar Snap",
+      "description": "Sweet and succulent, great raw or lightly cooked",
+      "image": "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FR-028",
+      "name": "Fresh Corn",
+      "price": 1.10,
+      "category": "Fresh Produce",
+      "size": "Per Ear",
+      "variety": "Sweet Yellow",
+      "description": "Peaches and cream texture, fresh from the field",
+      "image": "https://images.unsplash.com/photo-1517667342662-82581a7b4a30?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FR-029",
+      "name": "Corn Kernels",
+      "price": 0.85,
+      "category": "Fresh Produce",
+      "size": "12 oz",
+      "variety": "Sweet Frozen",
+      "description": "Perfectly kerneled fresh corn for quick meals",
+      "image": "https://images.unsplash.com/photo-1517667342662-82581a7b4a30?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-BD-001",
+      "name": "White Bread",
+      "price": 1.65,
+      "category": "Bakery",
+      "size": "1 lb Loaf",
+      "variety": "Sandwich Cut",
+      "description": "Classic soft white bread perfect for sandwiches",
+      "image": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-BD-002",
+      "name": "Wholegrain Bread",
+      "price": 2.27,
+      "category": "Bakery",
+      "size": "1.5 lb Loaf",
+      "variety": "Multigrain",
+      "description": "Hearty and nutritious whole wheat bread",
+      "image": "https://images.unsplash.com/photo-1585238341710-4913d3a3ba20?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-BD-003",
+      "name": "Rye Bread",
+      "price": 2.12,
+      "category": "Bakery",
+      "size": "1 lb Loaf",
+      "variety": "Dark Rye",
+      "description": "Dense and flavorful European-style rye bread",
+      "image": "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-BD-004",
+      "name": "Ciabatta",
+      "price": 2.59,
+      "category": "Bakery",
+      "size": "12 oz",
+      "variety": "Italian Style",
+      "description": "Traditional Italian bread with crispy crust",
+      "image": "https://images.unsplash.com/photo-1610899922902-fe10ce616b25?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-BD-005",
+      "name": "Baguette",
+      "price": 1.89,
+      "category": "Bakery",
+      "size": "18 inch",
+      "variety": "French",
+      "description": "Authentic French baguette with crusty exterior",
+      "image": "https://images.unsplash.com/photo-1585770266473-b8919052d038?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-BD-006",
+      "name": "Sourdough",
+      "price": 3.18,
+      "category": "Bakery",
+      "size": "1.5 lb Loaf",
+      "variety": "Artisan",
+      "description": "Tangy fermented sourdough with complex flavor",
+      "image": "https://images.unsplash.com/photo-1599599810694-b3d1a0c3a5d0?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-PT-001",
+      "name": "White Rice",
+      "price": 2.40,
+      "category": "Pantry Goods",
+      "size": "2 lb Bag",
+      "variety": "Long Grain",
+      "description": "Premium quality long grain white rice",
+      "image": "https://images.unsplash.com/photo-1586985289688-cacf884ca3c1?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-PT-002",
+      "name": "Brown Rice",
+      "price": 2.70,
+      "category": "Pantry Goods",
+      "size": "2 lb Bag",
+      "variety": "Organic",
+      "description": "Nutritious and nutty whole grain brown rice",
+      "image": "https://images.unsplash.com/photo-1586985289688-cacf884ca3c1?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-PT-003",
+      "name": "Jasmine Rice",
+      "price": 3.60,
+      "category": "Pantry Goods",
+      "size": "2 lb Bag",
+      "variety": "Thai",
+      "description": "Fragrant and delicate jasmine rice from Thailand",
+      "image": "https://images.unsplash.com/photo-1586985289688-cacf884ca3c1?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-PT-004",
+      "name": "Basmati Rice",
+      "price": 3.90,
+      "category": "Pantry Goods",
+      "size": "2 lb Bag",
+      "variety": "Indian",
+      "description": "Premium basmati rice with distinctive aroma",
+      "image": "https://images.unsplash.com/photo-1586985289688-cacf884ca3c1?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-PT-005",
+      "name": "Quinoa",
+      "price": 4.61,
+      "category": "Pantry Goods",
+      "size": "1 lb Bag",
+      "variety": "Organic",
+      "description": "Complete protein superfood quinoa",
+      "image": "https://images.unsplash.com/photo-1599599810986-c65d52735401?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-PT-006",
+      "name": "Couscous",
+      "price": 2.02,
+      "category": "Pantry Goods",
+      "size": "1 lb Box",
+      "variety": "Pearl",
+      "description": "Quick-cooking Mediterranean grain couscous",
+      "image": "https://images.unsplash.com/photo-1609501676725-7186f017a4b8?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-HW-001",
+      "name": "Lavender Soap",
+      "price": 3.67,
+      "category": "Health & Wellness",
+      "size": "100g Bar",
+      "variety": "Handmade",
+      "description": "Natural lavender soap bar for gentle cleansing",
+      "image": "https://images.unsplash.com/photo-1603567595657-5aa36a5d1e36?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-HW-002",
+      "name": "Tea Tree Shampoo",
+      "price": 4.86,
+      "category": "Health & Wellness",
+      "size": "250 ml Bottle",
+      "variety": "Organic",
+      "description": "Clarifying shampoo with tea tree oil",
+      "image": "https://images.unsplash.com/photo-1635520686290-1c1ef2d93688?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-HW-005",
+      "name": "Aloe Vera Conditioner",
+      "price": 5.40,
+      "category": "Health & Wellness",
+      "size": "250 ml Bottle",
+      "variety": "Natural",
+      "description": "Moisturizing conditioner with aloe vera extract",
+      "image": "https://images.unsplash.com/photo-1596462502278-af3c41a801c1?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-HW-010",
+      "name": "Natural Deodorant",
+      "price": 4.19,
+      "category": "Health & Wellness",
+      "size": "75g Stick",
+      "variety": "Mineral",
+      "description": "Natural deodorant for all-day freshness",
+      "image": "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FZ-001",
+      "name": "Frozen Berries",
+      "price": 2.72,
+      "category": "Frozen Foods",
+      "size": "16 oz Bag",
+      "variety": "Mixed",
+      "description": "Fresh frozen mixed berries for smoothies",
+      "image": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FZ-002",
+      "name": "Frozen Mango",
+      "price": 2.16,
+      "category": "Frozen Foods",
+      "size": "12 oz Bag",
+      "variety": "Chunks",
+      "description": "Tropical frozen mango chunks",
+      "image": "https://images.unsplash.com/photo-1582979830291-840a061c21ad?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-FZ-003",
+      "name": "Frozen Pineapple",
+      "price": 2.43,
+      "category": "Frozen Foods",
+      "size": "14 oz Bag",
+      "variety": "Tidbits",
+      "description": "Sweet frozen pineapple tidbits",
+      "image": "https://images.unsplash.com/photo-1562053139-df2b3b07d466?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-BV-001",
+      "name": "Mineral Water",
+      "price": 2.16,
+      "category": "Beverages",
+      "size": "24-pack Bottles",
+      "variety": "Spring",
+      "description": "Pure refreshing mineral water",
+      "image": "https://images.unsplash.com/photo-1545695891-6f03ee1b55cf?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-BV-004",
+      "name": "Premium Orange Juice",
+      "price": 2.23,
+      "category": "Beverages",
+      "size": "64 oz",
+      "variety": "Pulp Free",
+      "description": "100% pure squeezed orange juice",
+      "image": "https://images.unsplash.com/photo-1600271886742-f049cd1f3033?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-BV-008",
+      "name": "Kombucha",
+      "price": 2.97,
+      "category": "Beverages",
+      "size": "16 oz Bottle",
+      "variety": "Ginger",
+      "description": "Fermented kombucha tea with probiotics",
+      "image": "https://images.unsplash.com/photo-1585194326962-efc3df4b549b?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-SN-001",
+      "name": "Potato Chips",
+      "price": 2.14,
+      "category": "Snacks",
+      "size": "6 oz Bag",
+      "variety": "Sea Salt",
+      "description": "Crispy potato chips with sea salt",
+      "image": "https://images.unsplash.com/photo-1599599810694-b3d1a0c3a5d0?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-SN-007",
+      "name": "Trail Mix",
+      "price": 2.40,
+      "category": "Snacks",
+      "size": "8 oz Bag",
+      "variety": "Nut & Raisin",
+      "description": "Premium trail mix with nuts and dried fruit",
+      "image": "https://images.unsplash.com/photo-1565958011504-819fb9e39390?w=400&h=400&fit=crop"
+    },
+    {
+      "id": "LUM-SN-010",
+      "name": "Vegan Chocolate Bars",
+      "price": 2.75,
+      "category": "Snacks",
+      "size": "Box of 3",
+      "variety": "Dark Chocolate",
+      "description": "Delicious vegan-friendly dark chocolate bars",
+      "image": "https://images.unsplash.com/photo-1599599810694-b3d1a0c3a5d0?w=400&h=400&fit=crop"
+    }
+  ]
+}

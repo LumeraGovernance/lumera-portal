@@ -1,0 +1,145 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products - Lumera Marketplace</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="navbar">
+    <nav>
+        <ul>
+            <li><a href="/index.html">Home</a></li>
+            <li><a href="/products.html">Products</a></li>
+            <li><a href="/about.html">About</a></li>
+        </ul>
+        <div class="search">
+            <input type="text" placeholder="Search...">
+            <button type="submit">Search</button>
+        </div>
+    </nav>
+</div>
+
+<div class="hero">
+    <h1>Our Products</h1>
+    <p>Browse through our complete selection of fresh and quality products</p>
+</div>
+
+<!-- Order Section -->
+<div class="order-section">
+    <div class="order-container">
+        <h2>Your Order</h2>
+        <p class="order-instructions">📧 Remember to email your orders to: <strong>orders@lumeramarket.com</strong></p>
+        
+        <div class="order-form">
+            <label for="orderText">Add your address and selected items below, then copy & paste into email:</label>
+            <textarea id="orderText" placeholder="Add your address here:\n\n[Select products to add them below]\n\n[Ordering confirmation will continue in the follow up email]"></textarea>
+            
+            <div class="order-actions">
+                <button id="copyBtn" class="btn-copy">📋 Copy to Clipboard</button>
+                <button id="clearBtn" class="btn-clear">🗑️ Clear Order</button>
+            </div>
+            <p id="copyMessage" class="copy-message" style="display:none;">✓ Copied to clipboard!</p>
+        </div>
+    </div>
+</div>
+
+<div class="products" id="productsContainer">
+    <!-- Products will be loaded here from products.json -->
+</div>
+
+<script>
+    // Load products from JSON and render them
+    function loadProducts() {
+        fetch('products.json')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('productsContainer');
+                container.innerHTML = ''; // Clear existing content
+                
+                data.products.forEach(product => {
+                    const productCard = document.createElement('div');
+                    productCard.className = 'product-card';
+                    
+                    productCard.innerHTML = `
+                        <div class="product-image" style="background-image: url('${product.image}'); background-size: cover; background-position: center;"></div>
+                        <div class="product-info">
+                            <div class="product-header">
+                                <div class="product-id">${product.id}</div>
+                                <div class="product-price">$${product.price.toFixed(2)}</div>
+                            </div>
+                            <div class="product-name">${product.name}</div>
+                            <div class="product-details">
+                                <span class="detail-item"><strong>Size:</strong> ${product.size}</span>
+                                <span class="detail-item"><strong>Variety:</strong> ${product.variety}</span>
+                            </div>
+                            <div class="product-description">${product.description}</div>
+                            <div class="product-category">${product.category}</div>
+                            <button class="btn-add-cart">Add to Cart</button>
+                        </div>
+                    `;
+                    
+                    container.appendChild(productCard);
+                    
+                    // Add event listener to "Add to Cart" button
+                    const addBtn = productCard.querySelector('.btn-add-cart');
+                    addBtn.addEventListener('click', function() {
+                        const orderText = document.getElementById('orderText');
+                        const currentText = orderText.value;
+                        const newLine = `${product.id} - ${product.name} ($${product.price.toFixed(2)} each)\n`;
+                        orderText.value = currentText ? currentText + newLine : newLine;
+                    });
+                });
+            })
+            .catch(error => console.error('Error loading products:', error));
+    }
+    
+    // Load products when page loads
+    document.addEventListener('DOMContentLoaded', loadProducts);
+</script>
+
+<script>
+    // Order functionality
+    const orderTextarea = document.getElementById('orderText');
+    const copyBtn = document.getElementById('copyBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const copyMessage = document.getElementById('copyMessage');
+    
+    // Set up copy to clipboard button
+    copyBtn.addEventListener('click', function() {
+        orderTextarea.select();
+        document.execCommand('copy');
+        
+        // Show confirmation message
+        copyMessage.style.display = 'block';
+        copyBtn.textContent = '✓ Copied!';
+        
+        setTimeout(() => {
+            copyMessage.style.display = 'none';
+            copyBtn.textContent = '📋 Copy to Clipboard';
+        }, 2000);
+    });
+    
+    // Set up clear button
+    clearBtn.addEventListener('click', function() {
+        orderTextarea.value = '';
+        orderTextarea.focus();
+    });
+    
+    // Add product to order when "Add to Cart" button is clicked
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('btn-add-cart')) {
+            const productCard = e.target.closest('.product-card');
+            const productId = productCard.querySelector('.product-id').textContent;
+            const productName = productCard.querySelector('.product-name').textContent;
+            const productPrice = productCard.querySelector('.product-price').textContent;
+            
+            const currentText = orderTextarea.value;
+            const newLine = `${productId} - ${productName} (${productPrice} each)\n`;
+            orderTextarea.value = currentText ? currentText + newLine : newLine;
+        }
+    });
+</script>
+</body>
+</html>
